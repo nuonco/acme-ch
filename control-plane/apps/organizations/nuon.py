@@ -61,7 +61,7 @@ class NuonInstallMixin:
 
         inputs = ServiceCreateInstallV2RequestInputs.from_dict(
             dict(
-                cluster_name=self.slug,
+                cluster_name=self.id,
                 cluster_id=self.id,
                 deploy_headlamp=str(self.deploy_headlamp),
                 deploy_tailscale=str(self.deploy_tailscale),
