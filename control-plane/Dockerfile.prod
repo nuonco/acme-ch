@@ -1,0 +1,28 @@
+FROM python:3.13-slim-trixie
+
+WORKDIR /app
+
+# Install uv for faster dependency management
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    gcc \
+    python3-dev \
+    musl-dev \
+    libpq-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# copy deps
+COPY pyproject.toml uv.lock* ./
+
+# Install dependencies using uv
+RUN uv sync --frozen --no-dev
+
+# Copy application code
+COPY . .
+
+# Default command
+CMD ["uv", "run", "--", "gunicorn", "acme_ch.wsgi:application", "--bind", "0.0.0.0:$PORT"]

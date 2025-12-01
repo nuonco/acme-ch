@@ -1,0 +1,29 @@
+[project]
+name = "acme-ch"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "celery>=5.4.0",
+    "django-allauth[socialaccount]>=65.13.1",
+    "django-environ>=0.12.0",
+    "django-filter>=25.2",
+    "django-prettyjson>=0.4.1",
+    "django-registration>=5.2.1",
+    "django>=5.2.8",
+    "djangorestframework>=3.16.1",
+    "gunicorn>=23.0.0",
+    "markdown>=3.10",
+    "nuon",
+    "psycopg2>=2.9.11",
+    "redis>=5.0.0",
+    "requests>=2.32.5",
+    "svix-ksuid>=0.6.2",
+]
+
+[tool.uv.sources]
+nuon = { git = "https://github.com/nuonco/nuon-python", branch = "0b8c5575f79902b7a9028266a17c535cbb0a4e29" }
+
+[dependency-groups]
+dev = []

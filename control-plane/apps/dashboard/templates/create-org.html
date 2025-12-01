@@ -1,0 +1,252 @@
+{% extends "dashboard-base.html" %}
+
+{% block title %}Create Organization - Acme CH{% endblock %}
+
+{% block header %}Create Organization{% endblock %}
+
+{% block content %}
+<div class="mx-auto mb-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 p-6">
+    <div class="flex items-start gap-4">
+        <div class="flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-indigo-400">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0 1 18 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3 1.5 1.5 3-3.75" />
+            </svg>
+        </div>
+        <div class="flex-1">
+            <h2 class="text-lg font-semibold leading-7 text-indigo-300">Getting Started</h2>
+            <p class="mt-2 text-sm leading-6 text-gray-300">
+                Create an organization to get started with Acme CH. This is where all your resources will live.
+                When you have created your org, we will begin the process of installing the A.C.M.E. ClickHouse data plane in your AWS Account.
+            </p>
+            <div class="mt-4 text-sm leading-6 text-gray-300">
+                <p class="font-medium text-white mb-2">We will create the following resources in your account:</p>
+                <ul class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 list-disc list-inside text-gray-400">
+                    <li>VPC</li>
+                    <li>Subnets</li>
+                    <li>Runner ASG</li>
+                    <li>EKS Auto-Mode Cluster</li>
+                    <li class="col-span-2">Route53 Zone for our Subdomain</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mx-auto mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Tailscale Section -->
+    <div class="rounded-lg bg-gray-800 border border-gray-700 p-6">
+        <div class="flex items-center gap-3 mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-blue-400">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z" />
+            </svg>
+            <h3 class="text-base font-semibold text-white">Tailscale</h3>
+            <span class="inline-flex items-center rounded-md bg-gray-700 px-2 py-1 text-xs font-medium text-gray-300">Optional</span>
+        </div>
+        <p class="text-sm text-gray-400 mb-3">
+            Tailscale provides secure, private networking for your infrastructure without the complexity of traditional VPNs.
+        </p>
+        <ul class="text-xs text-gray-500 space-y-1 list-disc list-inside">
+            <li>Zero-config VPN for secure access to your cluster</li>
+            <li>Direct connections between nodes without NAT traversal</li>
+            <li>Built-in authentication and access controls</li>
+            <li>Works seamlessly with your existing network infrastructure</li>
+        </ul>
+        <div class="mt-4 pt-4 border-t border-gray-700">
+            <p class="text-xs text-gray-500">
+                <span class="font-medium text-gray-400">Note:</span> Tailscale integration can be enabled during the CloudFormation Stack Creation by providing OAuth Credentials.
+            </p>
+        </div>
+    </div>
+
+    <!-- Headlamp Section -->
+    <div class="rounded-lg bg-gray-800 border border-gray-700 p-6">
+        <div class="flex items-center gap-3 mb-3">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-purple-400">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+            </svg>
+            <h3 class="text-base font-semibold text-white">Headlamp</h3>
+            <span class="inline-flex items-center rounded-md bg-gray-700 px-2 py-1 text-xs font-medium text-gray-300">Optional</span>
+        </div>
+        <p class="text-sm text-gray-400 mb-3">
+            Headlamp is a user-friendly Kubernetes UI that makes it easy to visualize and manage your cluster resources.
+        </p>
+        <ul class="text-xs text-gray-500 space-y-1 list-disc list-inside">
+            <li>Modern web interface for Kubernetes management</li>
+            <li>Real-time resource monitoring and logs viewing</li>
+            <li>RBAC-aware with built-in authentication</li>
+            <li>Support for multiple clusters and namespaces</li>
+        </ul>
+        <div class="mt-4 pt-4 border-t border-gray-700">
+            <p class="text-xs text-gray-500">
+                <span class="font-medium text-gray-400">Note:</span> Enable this option below to deploy Headlamp with your organization. You can access it after deployment is complete.
+            </p>
+        </div>
+    </div>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="rounded-md bg-red-50 p-4 mb-6">
+    <div class="flex">
+      <div class="ml-3">
+        <h3 class="text-sm font-medium text-red-800">There were errors with your submission</h3>
+        <div class="mt-2 text-sm text-red-700">{{ form.non_field_errors }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="space-y-12">
+    <!-- AWS Configuration Section -->
+    <div class="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-white/10 pb-12 md:grid-cols-3">
+      <div>
+        <h2 class="text-base/7 font-semibold text-white">AWS Configuration</h2>
+        <p class="mt-1 text-sm/6 text-gray-400">Choose the AWS region where your infrastructure will be provisioned. Currently, we only support US regions.</p>
+      </div>
+
+      <div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
+        <div class="sm:col-span-4">
+          <label for="{{ form.region.id_for_label }}" class="block text-sm/6 font-medium text-white">AWS Region</label>
+          <div class="mt-2 grid grid-cols-1">
+            <select id="{{ form.region.id_for_label }}" name="{{ form.region.name }}" class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/5 py-1.5 pl-3 pr-8 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 [&_*]:text-black">
+              {% for value, label in form.region.field.choices %}
+              <option value="{{ value }}" {% if form.region.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <svg class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-400 sm:size-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          {% if form.region.errors %}
+          <p class="mt-2 text-sm text-red-400">{{ form.region.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Organization Details Section -->
+    <div class="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-white/10 pb-12 md:grid-cols-3">
+      <div>
+        <h2 class="text-base/7 font-semibold text-white">Organization Details</h2>
+        <p class="mt-1 text-sm/6 text-gray-400">This information will be used to identify your organization.</p>
+      </div>
+
+      <div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
+        <!-- Name Field -->
+        <div class="sm:col-span-4">
+          <label for="{{ form.name.id_for_label }}" class="block text-sm/6 font-medium text-white">Organization Name</label>
+          <div class="mt-2">
+            <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" value="{{ form.name.value|default:'' }}" class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" required>
+          </div>
+          <p class="mt-2 text-xs text-gray-400">
+            This name will be used as your Kubernetes cluster name and must follow RFC 1123 naming conventions: lowercase alphanumeric characters and hyphens only, starting and ending with an alphanumeric character.
+          </p>
+          {% if form.name.errors %}
+          <p class="mt-2 text-sm text-red-400">{{ form.name.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tailscale Section -->
+    <div class="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-white/10 pb-12 md:grid-cols-3">
+      <div>
+        <h2 class="text-base/7 font-semibold text-white">Tailscale Integration</h2>
+        <p class="mt-1 text-sm/6 text-gray-400">Secure networking for your cluster. OAuth credentials required.</p>
+      </div>
+
+      <div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
+        <div class="col-span-full">
+          <div class="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4">
+            <div class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+              </svg>
+              <div class="flex-1">
+                <h3 class="text-sm font-medium text-blue-300 mb-2">OAuth Credentials Required</h3>
+                <p class="text-sm text-gray-300 mb-3">
+                  Before we can enable Tailscale for your organization, you must complete the prerequisite setup. This includes creating OAuth credentials in your Tailscale admin console.
+                </p>
+                <p class="text-sm text-gray-300 mb-3">
+                  Please ensure you have your OAuth Client ID and Client Secret ready. You'll provide these credentials during the CloudFormation stack creation process.
+                </p>
+                <div class="mt-4 pt-3 border-t border-blue-500/20">
+                  <a href="https://tailscale.com/kb/1236/kubernetes-operator#prerequisites" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-400 hover:text-blue-300 inline-flex items-center gap-1">
+                    View Prerequisites Documentation
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                  </a>
+                  <div class="mt-2">
+                    <a href="https://github.com/tailscale/tailscale/blob/v1.90.6/cmd/k8s-operator/deploy/chart/templates/oauth-secret.yaml" target="_blank" rel="noopener noreferrer" class="text-xs text-gray-500 hover:text-gray-400 underline">
+                      OAuth Secret Template Reference
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Headlamp Section -->
+    <div class="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-white/10 pb-12 md:grid-cols-3">
+      <div>
+        <h2 class="text-base/7 font-semibold text-white">Headlamp (work in progress)</h2>
+        <p class="mt-1 text-sm/6 text-gray-400">Kubernetes UI for cluster management and monitoring. Not actually implemented yet. </p>
+      </div>
+
+      <div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
+        <div class="col-span-full">
+          <div class="rounded-lg bg-purple-500/10 border border-purple-500/20 p-4">
+            <div class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+              </svg>
+              <div class="flex-1">
+                <h3 class="text-sm font-medium text-purple-300 mb-2">Optional Kubernetes UI</h3>
+                <p class="text-sm text-gray-300 mb-3">
+                  Headlamp provides a modern, user-friendly web interface for managing your Kubernetes cluster. Enable this option to deploy Headlamp alongside your organization's infrastructure.
+                </p>
+                <p class="text-sm text-gray-300 mb-3">
+                  Once deployed, you can use Headlamp to monitor resources, view logs, manage deployments, and perform other cluster management tasks through an intuitive interface.
+                </p>
+                <div class="mt-4 pt-3 border-t border-purple-500/20">
+                  <a href="https://headlamp.dev/" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-purple-400 hover:text-purple-300 inline-flex items-center gap-1">
+                    Learn More About Headlamp
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 relative flex gap-x-3">
+            <div class="flex h-6 items-center">
+              <input id="{{ form.deploy_headlamp.id_for_label }}" name="{{ form.deploy_headlamp.name }}" type="checkbox" {% if form.deploy_headlamp.value %}checked{% endif %} class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 bg-white/5 border-white/10">
+            </div>
+            <div class="text-sm/6">
+              <label for="{{ form.deploy_headlamp.id_for_label }}" class="font-medium text-white">Deploy Headlamp</label>
+              <p class="text-gray-400">Deploy the Headlamp Kubernetes UI for managing your clusters.</p>
+            </div>
+          </div>
+          {% if form.deploy_headlamp.errors %}
+          <p class="mt-2 text-sm text-red-400">{{ form.deploy_headlamp.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 flex items-center justify-end gap-x-6">
+    <button type="button" class="text-sm/6 font-semibold text-white">Cancel</button>
+    <button type="submit" class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Create Organization</button>
+  </div>
+</form>
+{% endblock %}

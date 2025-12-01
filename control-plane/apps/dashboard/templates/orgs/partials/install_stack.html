@@ -1,0 +1,113 @@
+{% if object.nuon_install_stack %}
+<div class="space-y-6">
+    <!-- Metadata Grid -->
+    <div class="grid grid-cols-2 md:flex md:flex-wrap md:gap-x-6 gap-3 text-xs text-gray-500">
+        <div>
+            <span class="text-gray-600">ID:</span>
+            <span class="font-mono text-gray-400 ml-1">{{ object.nuon_install_stack.id|default:"-" }}</span>
+        </div>
+        <div>
+            <span class="text-gray-600">Install Stack ID:</span>
+            <span class="font-mono text-gray-400 ml-1">{{ object.nuon_install_stack.install_id|default:"-" }}</span>
+        </div>
+        <div>
+            <span class="text-gray-600">Created At:</span>
+            <span class="text-gray-400 ml-1">{{ object.nuon_install_stack.created_at|default:"-" }}</span>
+        </div>
+        <div>
+            <span class="text-gray-600">Updated At:</span>
+            <span class="text-gray-400 ml-1">{{ object.nuon_install_stack.updated_at|default:"-" }}</span>
+        </div>
+    </div>
+
+    <!-- Versions Section -->
+    {% if object.nuon_install_stack.versions %}
+    <div class="bg-gray-900/30 rounded-lg p-4">
+        <h4 class="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            Versions
+            <span class="inline-flex items-center rounded-md bg-blue-400/10 px-2 py-0.5 text-xs font-medium text-blue-400 ring-1 ring-inset ring-blue-400/30">
+                {{ object.nuon_install_stack.versions|length }}
+            </span>
+        </h4>
+        <div class="space-y-3">
+            {% for version in object.nuon_install_stack.versions %}
+            <div x-data="{ expanded: false }" class="bg-gray-900 rounded border border-gray-700">
+                <button @click="expanded = !expanded" class="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-800/50 transition rounded">
+                    <div class="flex-1 space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-mono text-gray-300">{{ version.id }}</span>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            Created: {{ version.created_at }}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        {% if version.composite_status.status %}
+                        <span class="inline-flex items-center rounded-md bg-gray-400/10 px-2 py-0.5 text-xs font-medium text-gray-400 ring-1 ring-inset ring-gray-400/20">
+                            {{ version.composite_status.status }}
+                        </span>
+                        {% endif %}
+                        <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </button>
+                <div x-show="expanded" x-collapse class="border-t border-gray-700">
+                    <div class="p-4 space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                            {% if version.app_config_id %}
+                            <div>
+                                <span class="text-gray-500">App Config ID:</span>
+                                <span class="text-gray-300 font-mono block mt-1">{{ version.app_config_id }}</span>
+                            </div>
+                            {% endif %}
+                            {% if version.phone_home_id %}
+                            <div>
+                                <span class="text-gray-500">Phone Home ID:</span>
+                                <span class="text-gray-300 font-mono block mt-1">{{ version.phone_home_id }}</span>
+                            </div>
+                            {% endif %}
+                            {% if version.template_url %}
+                            <div class="md:col-span-2">
+                                <span class="text-gray-500">Template URL:</span>
+                                <a href="{{ version.template_url }}" target="_blank" class="text-blue-400 hover:text-blue-300 font-mono block mt-1 break-all">
+                                    {{ version.template_url }}
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if version.quick_link_url %}
+                            <div class="md:col-span-2">
+                                <span class="text-gray-500">Quick Link URL:</span>
+                                <a href="{{ version.quick_link_url }}" target="_blank" class="text-blue-400 hover:text-blue-300 font-mono block mt-1 break-all">
+                                    {{ version.quick_link_url }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if version.contents %}
+                        <details class="mt-3">
+                            <summary class="cursor-pointer text-xs text-gray-400 hover:text-gray-300">View Contents (Base64)</summary>
+                            <pre class="mt-2 bg-gray-950 p-3 rounded text-xs text-gray-400 overflow-x-auto">{{ version.contents }}</pre>
+                        </details>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<div class="p-8 text-center">
+    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 mb-3">
+        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+    </div>
+    <p class="text-sm text-gray-400">No install stack data available</p>
+</div>
+{% endif %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="post" class="space-y-6">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+  <div class="rounded-md bg-red-50 p-4 mb-6">
+    <div class="flex">
+      <div class="ml-3">
+        <h3 class="text-sm font-medium text-red-800">
+          There were errors with your submission
+        </h3>
+        <div class="mt-2 text-sm text-red-700">
+          {{ form.non_field_errors }}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% for field in form %}
+  <div>
+    <label for="{{ field.id_for_label }}" class="block text-sm/6 font-medium text-gray-100">{{ field.label }}</label>
+    <div class="mt-2">
+      <input 
+        id="{{ field.id_for_label }}" 
+        name="{{ field.name }}" 
+        type="{{ field.field.widget.input_type }}" 
+        {% if field.field.required %}required{% endif %} 
+        class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
+      >
+      {% if field.errors %}
+      <p class="mt-2 text-sm text-red-400">{{ field.errors.0 }}</p>
+      {% endif %}
+      {% if field.help_text %}
+      <p class="mt-2 text-sm text-gray-400">{{ field.help_text }}</p>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div>
+    <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">Create account</button>
+  </div>
+</form>
+
+<p class="mt-10 text-center text-sm/6 text-gray-400">
+  Already a member?
+  <a href="{% url 'login' %}" class="font-semibold text-indigo-400 hover:text-indigo-300">Sign in</a>
+</p>
+{% endblock %}

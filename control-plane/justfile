@@ -1,0 +1,49 @@
+# vim: set ft=make :
+docker_compose_cmd := "docker compose -f docker-compose.yml"
+
+# print this message
+default:
+	just --list
+
+# run local dev environment
+up:
+	{{ docker_compose_cmd }} up --build --remove-orphans
+
+# docker compose down
+down:
+	{{ docker_compose_cmd }} down
+
+# run migrations
+makemigrations:
+	{{ docker_compose_cmd }} run web python manage.py makemigrations
+
+migrate:
+	{{ docker_compose_cmd }} run web python manage.py migrate
+
+# run preflight command
+preflight:
+	{{ docker_compose_cmd }} run web python manage.py preflight
+
+# createsuperuser
+createsuperuser:
+	{{ docker_compose_cmd }} run web python manage.py createsuperuser
+
+# run python tests
+test:
+	{{ docker_compose_cmd }} run web python -m pytest
+
+# run a command in a container
+run container="web" args="pwd && ls -Alh":
+	{{ docker_compose_cmd }} run {{container}} {{args}}
+
+# resart a specific container, or all if un-specified.
+restart container="":
+	{{ docker_compose_cmd }} restart {{container}}
+
+# stop a specific container, or all if un-specified.
+stop container="":
+	{{ docker_compose_cmd }} stop {{container}}
+
+# # run ngrok
+# ngrok:
+# 	@ngrok http 8000 --subdomain=$(NGROK_DOMAIN)
