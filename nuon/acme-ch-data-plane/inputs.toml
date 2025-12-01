@@ -51,3 +51,10 @@ name         = "deploy_headlamp"
 display_name = "Deploy Headlamp"
 description  = "Toggle to enable the headlamp eks admin interface."
 type         = "bool"
+
+[[input]]
+group        = "config"
+name         = "deploy_tailscale"
+display_name = "Deploy Tailscale"
+description  = "Toggle to enable tailscale for this cluster."
+type         = "bool"

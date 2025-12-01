@@ -5332,10 +5332,10 @@ subjects:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-    name: operator
+    naMe: operator
     namespace: tailscale
 spec:
-    replicas: 1
+    replicas: "{{ ternary 1 0 .nuon.inputs.inputs.deploy_tailscale }}"
     selector:
         matchLabels:
             app: operator
