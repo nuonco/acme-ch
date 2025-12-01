@@ -50,6 +50,7 @@ class Organization(BaseModel, NuonInstallMixin):
         max_length=20, choices=REGION_CHOICES, default=REGION_US_EAST_1
     )
     deploy_headlamp = models.BooleanField(default=False)
+    deploy_tailscale = models.BooleanField(default=False)
 
     # Nuon fields
     nuon_install_id = models.CharField(max_length=255, blank=True, null=True)

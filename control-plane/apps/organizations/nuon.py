@@ -64,6 +64,7 @@ class NuonInstallMixin:
                 cluster_name=self.slug,
                 cluster_id=self.id,
                 deploy_headlamp=str(self.deploy_headlamp),
+                deploy_tailscale=str(self.deploy_tailscale),
                 acme_ch_api_url=settings.WEB_SERVICE_DOMAIN,
                 acme_ch_org_id=self.id,
                 acme_ch_api_token=api_token,

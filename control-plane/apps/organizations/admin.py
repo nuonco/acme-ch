@@ -27,6 +27,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         "region",
         "created_by",
         "deploy_headlamp",
+        "deploy_tailscale",
         "nuon_install_id",
         "reprovision_button",
         "nuon_install_display",
@@ -90,7 +91,7 @@ class OrganizationAdmin(admin.ModelAdmin):
         ),
         (
             "Configuration",
-            {"fields": ("deploy_headlamp",)},
+            {"fields": ("deploy_headlamp", "deploy_tailscale")},
         ),
         (
             "Nuon",

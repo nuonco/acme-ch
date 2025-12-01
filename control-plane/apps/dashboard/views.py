@@ -32,7 +32,7 @@ class Index(LoginRequiredMixin, TemplateView):
 
 class CreateOrg(LoginRequiredMixin, CreateView):
     model = Organization
-    fields = ["name", "region", "deploy_headlamp"]
+    fields = ["name", "region", "deploy_headlamp", "deploy_tailscale"]
     template_name = "create-org.html"
 
     def form_valid(self, form):

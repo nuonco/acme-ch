@@ -1,3 +1,4 @@
+{% load dashboard_filters %}
 <div id="org-cta"
      hx-get="{% url 'org-detail-cta' object.slug %}"
      hx-trigger="load delay:{{ poll_interval }}s"
@@ -5,7 +6,7 @@
 
 {% if cta_state == 'INSTALL_STACK_AWAITING_USER_RUN' %}
   {# Blue CTA - Ready to Deploy #}
-    <div id="install-stack-cta" class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-6 mb-6">
+  <div id="install-stack-cta" class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-6 mb-6" data-deploy-tailscale="{{object.deploy_tailscale}}">
         <div class="flex items-start gap-4">
             <div class="flex-shrink-0">
                 <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -16,7 +17,7 @@
                 <h3 class="text-lg font-medium text-blue-300 mb-2">Ready to Deploy</h3>
                 <p class="text-sm text-gray-300 mb-4">Your installation stack has been generated and is ready. Continue by deploying it to AWS CloudFormation.</p>
                 <div class="space-y-2">
-                    <a href="{{ version.quick_link_url }}"
+                    <a href="{{ version.quick_link_url|add_tailscale_params:object.deploy_tailscale }}"
                        target="_blank"
                        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-md transition">
                         Continue to AWS
