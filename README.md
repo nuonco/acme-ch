@@ -6,7 +6,7 @@ Unlock the full potential of real-time analytics with **A.C.M.E. ClickHouse**. O
 empowers engineering teams to deploy managed ClickHouse clusters directly into their own AWS accounts, ensuring complete
 data sovereignty and compliance.
 
-[![Deploy to Nuon](https://nuon.co/Deploy.svg)](https://app.nuon.co/deploy?repository-url=https://github.com/fidiego/acme-ch)
+<!-- [![Deploy to Nuon](https://nuon.co/Deploy.svg)](https://app.nuon.co/deploy?repository-url=https://github.com/fidiego/acme-ch) -->
 
 ### Architecture: Control Plane / Data Plane Separation
 
