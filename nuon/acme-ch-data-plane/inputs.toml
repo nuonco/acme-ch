@@ -1,0 +1,53 @@
+#:schema https://api.nuon.co/v1/general/config-schema?source=inputs
+[[group]]
+name         = "control_plane"
+description  = "Configuration from ch control plane"
+display_name = "A.C.M.E. ClickHouse Control Plane Facts"
+
+[[input]]
+group        = "control_plane"
+name         = "acme_ch_api_url"
+display_name = "Control Plan API URL"
+description  = "The root url for the control plane service."
+default      = "https://acme-ch.demo.nuon.fun"
+type         = "string"
+
+[[input]]
+group        = "control_plane"
+name         = "acme_ch_org_id"
+display_name = "Organization Id"
+description  = "Org ID of the org we are creating the cluster for."
+type         = "string"
+
+[[input]] # TODO(fd): this can be a secret later
+group        = "control_plane"
+name         = "acme_ch_api_token"
+display_name = "API Token"
+description  = "API Token for the service account user for the org."
+type         = "string"
+
+[[group]]
+name         = "config"
+description  = "Configuration for ch data plane"
+display_name = "A.C.M.E. ClickHouse Data Plane Cluster Config"
+
+[[input]]
+group        = "config"
+name         = "cluster_name"
+display_name = "Cluster Name"
+description  = "The name for the EKS cluster."
+type         = "string"
+
+[[input]]
+group        = "config"
+name         = "cluster_id"
+display_name = "Cluster ID"
+description  = "The id for the acme-ch org. Used to tag resources in the EKS Cluster."
+type         = "string"
+
+[[input]]
+group        = "config"
+name         = "deploy_headlamp"
+display_name = "Deploy Headlamp"
+description  = "Toggle to enable the headlamp eks admin interface."
+type         = "bool"

@@ -1,0 +1,6 @@
+type        = "aws-cloudformation"
+name        = "acme-ch-data-plane-{{.nuon.install.id}}"
+description = "QuickLink for the A.C.M.E. CH Data-plane for Install {{.nuon.install.id}}"
+
+vpc_nested_template_url    = "https://nuon-artifacts.s3.us-west-2.amazonaws.com/aws-cloudformation-templates/v0.1.8/vpc/eks/default/stack.yaml"
+runner_nested_template_url = "https://nuon-artifacts.s3.us-west-2.amazonaws.com/aws-cloudformation-templates/v0.1.8/runner/asg/stack.yaml"

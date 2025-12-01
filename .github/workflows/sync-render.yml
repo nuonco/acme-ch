@@ -1,0 +1,22 @@
+name: Sync Render Configuration
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'render.yaml'
+      - '.github/workflows/sync-render.yml'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+      - name: Deployment triggered
+        run: echo "Render sync has been triggered successfully"

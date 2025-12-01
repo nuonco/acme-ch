@@ -1,0 +1,138 @@
+---
+# ServiceAccount for the data-plane agent
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: data-plane-agent
+  namespace: acme-ch
+  labels:
+    app: data-plane-agent
+    component: reconciler
+    managed-by: acme-ch
+
+---
+# ClusterRole with minimum required permissions
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: data-plane-agent
+  labels:
+    app: data-plane-agent
+    component: reconciler
+    managed-by: acme-ch
+rules:
+  # Namespace management (cluster-scoped)
+  # Agent creates/deletes namespaces dynamically per ClickHouse cluster
+  - apiGroups: [""]
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+      - delete
+
+  # Secrets (namespaced)
+  # Agent creates ClickHouse credentials in each cluster namespace
+  - apiGroups: [""]
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+
+  # Services (namespaced)
+  # Agent creates services for ClickHouse cluster access
+  - apiGroups: [""]
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+
+  # Ingresses (namespaced)
+  # Agent creates ingresses based on cluster ingress_type configuration
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+
+  # ClickHouseInstallation CRD (namespaced)
+  # Altinity ClickHouse Operator CRD for managing ClickHouse clusters
+  - apiGroups: ["clickhouse.altinity.com"]
+    resources:
+      - clickhouseinstallations
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+
+  # ClickHouseKeeperInstallation CRD (namespaced)
+  # Altinity ClickHouse Operator CRD for managing ClickHouse Keeper clusters
+  - apiGroups: ["clickhouse-keeper.altinity.com"]
+    resources:
+      - clickhousekeeperinstallations
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+
+  # Karpenter EC2NodeClass (cluster-scoped)
+  # Agent creates EC2NodeClass resources for Karpenter node provisioning
+  - apiGroups: ["karpenter.k8s.aws"]
+    resources:
+      - ec2nodeclasses
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+
+  # Karpenter NodePool (cluster-scoped)
+  # Agent creates NodePool resources for Karpenter node provisioning
+  - apiGroups: ["karpenter.sh"]
+    resources:
+      - nodepools
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+      - update
+
+---
+# ClusterRoleBinding to grant permissions to the ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: data-plane-agent
+  labels:
+    app: data-plane-agent
+    component: reconciler
+    managed-by: acme-ch
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: data-plane-agent
+subjects:
+  - kind: ServiceAccount
+    name: data-plane-agent
+    namespace: acme-ch

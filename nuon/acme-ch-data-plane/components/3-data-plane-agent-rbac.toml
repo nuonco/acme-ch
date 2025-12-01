@@ -1,0 +1,6 @@
+#:schema https://api.nuon.co/v1/general/config-schema?type=kubernetes-manifest
+name      = "data_plane_agent_rbac"
+type      = "kubernetes_manifest"
+namespace = "data-plane"
+
+manifest = "./manifests/data-plane-agent-rbac.yaml"

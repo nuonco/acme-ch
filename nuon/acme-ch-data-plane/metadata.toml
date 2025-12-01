@@ -1,0 +1,5 @@
+version = "v2"
+
+display_name = "A.C.M.E. ClickHouse DataPlane"
+description  = "A.C.M.E. ClickHouse DataPlane EKS Cluster"
+readme       = "./readme.md"

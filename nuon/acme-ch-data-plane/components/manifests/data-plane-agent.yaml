@@ -1,0 +1,53 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: data-plane-agent-config
+  namespace: acme-ch
+  labels:
+    app: data-plane-agent
+    component: reconciler
+    managed-by: acme-ch
+data:
+  ACME_CH_API_URL: "{{ .nuon.inputs.inputs.acme_ch_api_url }}"
+  ACME_CH_API_TOKEN: "{{ .nuon.inputs.inputs.acme_ch_api_token }}"
+  ACME_CH_ORG_ID: "{{ .nuon.inputs.inputs.acme_ch_org_id }}"
+  IN_CLUSTER: "true"
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: data-plane-agent
+  namespace: acme-ch
+spec:
+  schedule: "*/2 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: data-plane-agent
+          restartPolicy: OnFailure
+          containers:
+          - name: data-plane-agent
+            image: "{{ .nuon.components.img_acme_ch_data_plane_agent.outputs.image.repository }}:{{ .nuon.components.img_acme_ch_data_plane_agent.outputs.image.tag }}"
+            imagePullPolicy: Always
+            envFrom:
+            - configMapRef:
+                name: data-plane-agent-config
+            command:
+            - uv
+            - run
+            - --
+            - python
+            - main.py
+            - reconcile
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "500m"
+              limits:
+                memory: "256Mi"
+                cpu: "500m"
