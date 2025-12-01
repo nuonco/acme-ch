@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  # we use a unique name and host since we would like for these to be unique across installs
+  name: '{{ cluster.slug }}-ts'
+  namespace: clickhouse
+  labels:
+    app.nuon.co/name: clickhouse
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - '{{ cluster.slug }}'
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: clickhouse
+                port:
+                  name: http

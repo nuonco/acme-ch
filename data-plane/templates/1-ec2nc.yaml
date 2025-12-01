@@ -1,0 +1,19 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: "{{ cluster.slug }}"
+spec:
+  amiSelectorTerms:
+  - alias: "al2023@latest" # not recommended, fyi
+  instanceProfile: "{{ karpenter.instance_profile.name }}"
+  securityGroupSelectorTerms:
+  - tags:
+      "{{ karpenter.discovery_key }}": "{{ karpenter.discovery_value }}"
+  subnetSelectorTerms:
+  - tags:
+      "{{ karpenter.discovery_key }}": "{{ karpenter.discovery_value }}"
+      "kubernetes.io/cluster/{{ org.slug }}": shared
+      # specific to nuon's eks cloudformation template
+      "network.nuon.co/domain": internal
+  tags:
+      "{{ karpenter.discovery_key }}": "{{ karpenter.discovery_value }}"
