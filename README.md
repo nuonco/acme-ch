@@ -35,3 +35,8 @@ _Precision. Scale. Insight._
 ---
 
 © 2025 A.C.M.E. Corporation.
+
+---
+
+Note: the purpose of this repository is to demonstrate how to integrate the Nuon API into a product to provide a
+first-class experience.
