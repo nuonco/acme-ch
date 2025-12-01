@@ -142,7 +142,7 @@
                                 </a>
                                 {% endif %}
                                 {% if object.nuon_latest_install_stack_version.quick_link_url %}
-                                <a href="{{ object.nuon_latest_install_stack_version.quick_link_url }}"
+                                <a href="{{ object.nuon_latest_install_stack_version.quick_link_url|add_tailscale_params:object.deploy_tailscale }}"
                                    target="_blank"
                                    class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-md transition">
                                     Apply Stack
