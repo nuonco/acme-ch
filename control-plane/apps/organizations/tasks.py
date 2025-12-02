@@ -115,7 +115,7 @@ def create_service_account_user(organization_id):
         else:
             logger.info(f"API token already exists for user: {email}")
 
-        return {"user_id": user.id, "email": email, "token": token.key}
+        return
 
     except Organization.DoesNotExist:
         logger.error(f"Organization with id {organization_id} does not exist")
