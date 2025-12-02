@@ -11,7 +11,10 @@ from nuon.api.installs import get_workflows
 from nuon.api.installs import get_workflow_steps
 from nuon.api.installs import reprovision_install
 from nuon.api.installs import create_workflow_step_approval_response
+from nuon.api.installs import update_install_workflow
 from nuon.models.stderr_err_response import StderrErrResponse
+from nuon.models.app_install_approval_option import AppInstallApprovalOption
+from nuon.models.service_update_workflow_request import ServiceUpdateWorkflowRequest
 from nuon.models.service_create_install_v2_request import ServiceCreateInstallV2Request
 from nuon.models.service_create_install_v2_request_inputs import (
     ServiceCreateInstallV2RequestInputs,
@@ -161,7 +164,8 @@ class NuonInstallMixin:
 
     def get_workflows(self):
         """
-        fetch workflows for the install from nuon using self.nuon_install_id as the install id
+        fetch workflows for the install from nuon using self.nuon_install_id as the install id.
+        Automatically approves the most recent provision or reprovision workflow.
         """
         nc = NuonAPIClient()
         with nc.get_client() as client:
@@ -175,6 +179,40 @@ class NuonInstallMixin:
         data = [workflow.to_dict() for workflow in workflows]
         self.nuon_workflows = data
         self.save(update_fields=["nuon_workflows"])
+
+        if data:
+            most_recent = data[0]
+            workflow_type = most_recent.get("type")
+            approval_option = most_recent.get("approval_option")
+            if workflow_type in ("provision", "reprovision") and approval_option != "approve-all":
+                self.approve_workflow(most_recent.get("id"))
+
+    def approve_workflow(self, workflow_id):
+        """
+        Approve a workflow by patching it with approve_all option.
+
+        Args:
+            workflow_id (str): The workflow ID to approve
+
+        Returns:
+            AppWorkflow or None on error
+        """
+        nc = NuonAPIClient()
+        with nc.get_client() as client:
+            body = ServiceUpdateWorkflowRequest(
+                approval_option=AppInstallApprovalOption.APPROVE_ALL
+            )
+            response = update_install_workflow.sync(
+                client=client,
+                install_workflow_id=workflow_id,
+                body=body,
+            )
+
+        if isinstance(response, StderrErrResponse):
+            print(response)
+            return None
+
+        return response
 
     def nuon_refresh(self):
         self.get_nuon_install()

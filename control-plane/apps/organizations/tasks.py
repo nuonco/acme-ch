@@ -63,7 +63,9 @@ def reprovision_nuon_install(organization_id):
     except Organization.DoesNotExist:
         logger.error(f"Organization with id {organization_id} does not exist")
     except Exception as e:
-        logger.error(f"Error reprovisioning nuon install for org {organization_id}: {e}")
+        logger.error(
+            f"Error reprovisioning nuon install for org {organization_id}: {e}"
+        )
         raise e
 
 
@@ -99,13 +101,15 @@ def create_service_account_user(organization_id):
             defaults={
                 "is_active": True,
                 "is_staff": False,
-            }
+            },
         )
 
         if created:
             logger.info(f"Created service account user: {email} for org {org.id}")
         else:
-            logger.info(f"Service account user already exists: {email} for org {org.id}")
+            logger.info(
+                f"Service account user already exists: {email} for org {org.id}"
+            )
 
         # Create or get API token for the user
         token, token_created = Token.objects.get_or_create(user=user)
@@ -125,7 +129,9 @@ def create_service_account_user(organization_id):
 
 
 @shared_task
-def create_workflow_step_approval(organization_id, workflow_id, step_id, approval_id, response_type, note=None):
+def create_workflow_step_approval(
+    organization_id, workflow_id, step_id, approval_id, response_type, note=None
+):
     """
     Create a response for a workflow step approval.
 
@@ -147,7 +153,7 @@ def create_workflow_step_approval(organization_id, workflow_id, step_id, approva
             step_id=step_id,
             approval_id=approval_id,
             response_type=response_type,
-            note=note
+            note=note,
         )
 
         if response:
@@ -155,7 +161,7 @@ def create_workflow_step_approval(organization_id, workflow_id, step_id, approva
                 f"Created workflow step approval for org {organization_id}, "
                 f"workflow {workflow_id}, step {step_id}, approval {approval_id}"
             )
-            return response.to_dict() if hasattr(response, 'to_dict') else response
+            return response.to_dict() if hasattr(response, "to_dict") else response
         else:
             logger.error(
                 f"Failed to create workflow step approval for org {organization_id}, "
@@ -233,7 +239,7 @@ def workflow_approve_all(organization_id, workflow_id):
                     step_id=step_id,
                     approval_id=approval_id,
                     response_type="approve",
-                    note="approved by approve all action"
+                    note="approved by approve all action",
                 )
 
                 if result:
@@ -263,7 +269,7 @@ def workflow_approve_all(organization_id, workflow_id):
         return {
             "approved_count": approved_count,
             "failed_count": failed_count,
-            "message": f"Processed {approved_count} approvals successfully"
+            "message": f"Processed {approved_count} approvals successfully",
         }
 
     except Organization.DoesNotExist:
