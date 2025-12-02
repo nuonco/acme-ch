@@ -7,6 +7,7 @@ from django.utils import timezone
 from datetime import datetime
 
 from organizations.models import Organization, OrganizationMember
+from organizations.forms import OrganizationForm
 from clusters.models import CHCluster
 
 
@@ -32,7 +33,7 @@ class Index(LoginRequiredMixin, TemplateView):
 
 class CreateOrg(LoginRequiredMixin, CreateView):
     model = Organization
-    fields = ["name", "region", "deploy_headlamp", "deploy_tailscale"]
+    form_class = OrganizationForm
     template_name = "create-org.html"
 
     def form_valid(self, form):
