@@ -5,4 +5,4 @@ metadata:
   name: "tailnet-proxies-{{.nuon.install.id}}"
 spec:
   type: ingress
-  replicas: "{{ ternary 3 0 .nuon.inputs.inputs.deploy_tailscale }}"
+  replicas: {{ ternary 3 0 (eq "true" .nuon.inputs.inputs.deploy_tailscale) }}
