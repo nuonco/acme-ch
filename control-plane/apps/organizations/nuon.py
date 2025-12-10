@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.auth.models import Group
 from rest_framework.authtoken.models import Token
 
 from nuon.api.installs import get_install
@@ -51,16 +50,20 @@ class NuonInstallMixin:
             # TODO: add a log here that the install has already been created
             return
 
-        # Load the first user that's a member of this org with the "Operator" group
-        operator_group = Group.objects.filter(name="Operator").first()
-        operator_user = None
+        # Find the service account by naming convention and ROLE_OPERATOR
+        from organizations.models import OrganizationMember
+
+        email = f"{self.identifier}-sa@acme-ch.com"
         api_token = ""
 
-        if operator_group:
-            operator_user = self.members.filter(groups=operator_group).first()
-            if operator_user:
-                token, created = Token.objects.get_or_create(user=operator_user)
-                api_token = token.key
+        membership = OrganizationMember.objects.filter(
+            organization=self,
+            user__email=email,
+            role=OrganizationMember.ROLE_OPERATOR,
+        ).first()
+        if membership:
+            token, created = Token.objects.get_or_create(user=membership.user)
+            api_token = token.key
 
         inputs = ServiceCreateInstallV2RequestInputs.from_dict(
             dict(

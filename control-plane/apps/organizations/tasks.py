@@ -3,7 +3,7 @@ import logging
 
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
-from organizations.models import Organization
+from organizations.models import Organization, OrganizationMember
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -110,6 +110,18 @@ def create_service_account_user(organization_id):
             logger.info(
                 f"Service account user already exists: {email} for org {org.id}"
             )
+
+        # Add the service account to the org's Operators list
+        membership, membership_created = OrganizationMember.objects.get_or_create(
+            organization=org,
+            user=user,
+            defaults={"role": OrganizationMember.ROLE_OPERATOR},
+        )
+
+        if membership_created:
+            logger.info(f"Added service account {email} as operator for org {org.id}")
+        else:
+            logger.info(f"Service account {email} already a member of org {org.id}")
 
         # Create or get API token for the user
         token, token_created = Token.objects.get_or_create(user=user)
