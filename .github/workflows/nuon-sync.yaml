@@ -1,0 +1,23 @@
+name: Nuon Sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'nuon/acme-ch-data-plane/**'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync Nuon App
+        uses: nuonco/actions-nuon@v0.2.0
+        with:
+          org_id: ${{ secrets.NUON_ORG_ID }}
+          api_token: ${{ secrets.NUON_API_TOKEN }}
+          app_name: acme-ch-data-plane
+          command: apps sync -d nuon/acme-ch-data-plane
