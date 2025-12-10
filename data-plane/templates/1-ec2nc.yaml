@@ -12,8 +12,5 @@ spec:
   subnetSelectorTerms:
   - tags:
       "{{ karpenter.discovery_key }}": "{{ karpenter.discovery_value }}"
-      "kubernetes.io/cluster/{{ org.slug }}": shared
-      # specific to nuon's eks cloudformation template
-      "network.nuon.co/domain": internal
   tags:
       "{{ karpenter.discovery_key }}": "{{ karpenter.discovery_value }}"
