@@ -2,5 +2,5 @@ name   = "img_acme_ch_data_plane_agent"
 type   = "container_image"
 
 [public]
-image_url = "nuonfred/acme-ch-data-plane-agent"
+image_url = "nuonfred/acme-ch-data-plane"
 tag       = "latest"
