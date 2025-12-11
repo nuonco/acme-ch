@@ -56,28 +56,28 @@ spec:
                 - mountPath: /var/lib/clickhouse
                   name: clickhouse-cluster
           nodeSelector:
-            pool.acme-ch.co: "{{cluster.slug}}"
+            pool.acme-ch.co: '{{cluster.slug}}'
           tolerations:
             - effect: NoSchedule
               key: pool.acme-ch.co
               operator: Equal
-              value: "{{ cluster.slug }}"
+              value: '{{ cluster.slug }}'
 
           topologySpreadConstraints:
-          - labelSelector:
-              matchLabels:
-                clickhouse.altinity.com/chi: clickhouse-installation
-            maxSkew: 1
-            topologyKey: kubernetes.io/hostname
-            whenUnsatisfiable: ScheduleAnyway
+            - labelSelector:
+                matchLabels:
+                  clickhouse.altinity.com/chi: clickhouse-installation
+              maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: ScheduleAnyway
 
           affinity:
             podAntiAffinity:
               requiredDuringSchedulingIgnoredDuringExecution:
-              - labelSelector:
-                  matchLabels:
-                    clickhouse.altinity.com/chi: clickhouse-installation
-                topologyKey: kubernetes.io/hostname
+                - labelSelector:
+                    matchLabels:
+                      clickhouse.altinity.com/chi: clickhouse-installation
+                  topologyKey: kubernetes.io/hostname
     serviceTemplates:
       - name: clickhouse-cluster
         spec:

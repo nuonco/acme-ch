@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    kubernetes.io/metadata.name: "{{ cluster.slug }}"
-    name: "{{ cluster.slug }}"
-    managed_by: "acme-ch-data-plane-agent"
-  name: "{{ cluster.slug }}"
+    kubernetes.io/metadata.name: '{{ cluster.slug }}'
+    name: '{{ cluster.slug }}'
+    managed_by: 'acme-ch-data-plane-agent'
+  name: '{{ cluster.slug }}'

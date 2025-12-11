@@ -1,16 +1,16 @@
 apiVersion: karpenter.k8s.aws/v1
 kind: EC2NodeClass
 metadata:
-  name: "{{ cluster.slug }}"
+  name: '{{ cluster.slug }}'
 spec:
   amiSelectorTerms:
-  - alias: "al2023@latest" # not recommended, fyi
-  instanceProfile: "{{ karpenter.instance_profile.name }}"
+    - alias: 'al2023@latest' # not recommended, fyi
+  instanceProfile: '{{ karpenter.instance_profile.name }}'
   securityGroupSelectorTerms:
-  - tags:
-      "{{ karpenter.discovery_key }}": "{{ karpenter.discovery_value }}"
+    - tags:
+        '{{ karpenter.discovery_key }}': '{{ karpenter.discovery_value }}'
   subnetSelectorTerms:
-  - tags:
-      "{{ karpenter.discovery_key }}": "{{ karpenter.discovery_value }}"
+    - tags:
+        '{{ karpenter.discovery_key }}': '{{ karpenter.discovery_value }}'
   tags:
-      "{{ karpenter.discovery_key }}": "{{ karpenter.discovery_value }}"
+    '{{ karpenter.discovery_key }}': '{{ karpenter.discovery_value }}'

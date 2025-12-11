@@ -1,8 +1,8 @@
-apiVersion: "clickhouse-keeper.altinity.com/v1"
-kind: "ClickHouseKeeperInstallation"
+apiVersion: 'clickhouse-keeper.altinity.com/v1'
+kind: 'ClickHouseKeeperInstallation'
 metadata:
-  name: "clickhouse-keeper"
-  namespace: "{{ cluster.slug }}"
+  name: 'clickhouse-keeper'
+  namespace: '{{ cluster.slug }}'
 spec:
   defaults:
     templates:
@@ -35,30 +35,30 @@ spec:
           prometheus/status_info: 'false'
   templates:
     podTemplates:
-    - name: clickhouse-keeper
-      spec:
-        containers:
-          - name: clickhouse-keeper
-            image: "{{ keeper.image_repository }}:{{ keeper.image_tag }}"
-            imagePullPolicy: IfNotPresent
-        nodeSelector:
-          "pool.acme-ch.co": "clickhouse-keeper"
-        tolerations:
-          - effect: NoSchedule
-            key: pool.acme-ch.co
-            operator: Equal
-            value: "{{ cluster.slug }}"
-        topologySpreadConstraints:
-          - maxSkew: 1
-            minDomains: 3
-            topologyKey: kubernetes.io/hostname
-            whenUnsatisfiable: DoNotSchedule
-            labelSelector:
-              matchLabels:
-                "app": "clickhouse-keeper"
-        securityContext:
-          fsGroup: 101
-          runAsUser: 101
+      - name: clickhouse-keeper
+        spec:
+          containers:
+            - name: clickhouse-keeper
+              image: '{{ keeper.image_repository }}:{{ keeper.image_tag }}'
+              imagePullPolicy: IfNotPresent
+          nodeSelector:
+            'pool.acme-ch.co': 'clickhouse-keeper'
+          tolerations:
+            - effect: NoSchedule
+              key: pool.acme-ch.co
+              operator: Equal
+              value: '{{ cluster.slug }}'
+          topologySpreadConstraints:
+            - maxSkew: 1
+              minDomains: 3
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  'app': 'clickhouse-keeper'
+          securityContext:
+            fsGroup: 101
+            runAsUser: 101
     serviceTemplates:
       - name: clickhouse-keeper
         metadata:

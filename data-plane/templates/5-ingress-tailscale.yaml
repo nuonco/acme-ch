@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   # we use a unique name and host since we would like for these to be unique across installs
   name: '{{ cluster.slug }}-ts'
-  namespace: clickhouse
+  namespace: '{{ cluster.slug }}'
   labels:
     app.nuon.co/name: clickhouse
 spec:
