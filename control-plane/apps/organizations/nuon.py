@@ -187,7 +187,10 @@ class NuonInstallMixin:
             most_recent = data[0]
             workflow_type = most_recent.get("type")
             approval_option = most_recent.get("approval_option")
-            if workflow_type in ("provision", "reprovision") and approval_option != "approve-all":
+            if (
+                workflow_type in ("provision", "reprovision")
+                and approval_option != "approve-all"
+            ):
                 self.approve_workflow(most_recent.get("id"))
 
     def approve_workflow(self, workflow_id):

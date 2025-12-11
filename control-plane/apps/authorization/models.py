@@ -50,7 +50,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     @property
     def avatar_url(self):
         """Get user's avatar from their Google social account, or return default"""
-        social_account = self.socialaccount_set.filter(provider='google').first()
+        social_account = self.socialaccount_set.filter(provider="google").first()
         if social_account:
             return social_account.get_avatar_url()
         # Default avatar

@@ -9,7 +9,13 @@ class OrganizationForm(forms.ModelForm):
 
     class Meta:
         model = Organization
-        fields = ["name", "region", "deploy_headlamp", "deploy_tailscale"]
+        fields = [
+            "name",
+            "region",
+            "deploy_headlamp",
+            "deploy_tailscale",
+            "enable_delegation",
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

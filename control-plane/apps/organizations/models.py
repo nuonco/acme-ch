@@ -49,6 +49,8 @@ class Organization(BaseModel, NuonInstallMixin):
     region = models.CharField(
         max_length=20, choices=REGION_CHOICES, default=REGION_US_EAST_1
     )
+
+    enable_delegation = models.BooleanField(default=False)
     deploy_headlamp = models.BooleanField(default=False)
     deploy_tailscale = models.BooleanField(default=False)
 

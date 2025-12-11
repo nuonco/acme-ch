@@ -31,6 +31,7 @@ class ApproveStepView(View):
     def post(self, request, *args, **kwargs):
         try:
             import json
+
             data = json.loads(request.body)
 
             workflow_id = data.get("workflow_id")
@@ -67,9 +68,7 @@ class ApproveStepView(View):
 
             # Handle response
             if response is None:
-                return JsonResponse(
-                    {"error": "No response from Nuon API"}, status=500
-                )
+                return JsonResponse({"error": "No response from Nuon API"}, status=500)
 
             # Check if response is an error
             if hasattr(response, "message"):
@@ -84,9 +83,7 @@ class ApproveStepView(View):
                 f"Successfully approved workflow step: workflow_id={workflow_id}, step_id={step_id}"
             )
 
-            return JsonResponse(
-                {"success": True, "data": response_dict}, status=200
-            )
+            return JsonResponse({"success": True, "data": response_dict}, status=200)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON in request body"}, status=400)

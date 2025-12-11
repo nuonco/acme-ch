@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from organizations.models import Organization
 from organizations.tasks import create_nuon_install, create_service_account_user
 
+
 @receiver(post_save, sender=Organization)
 def organization_post_create(sender, instance, created, **kwargs):
     if created:

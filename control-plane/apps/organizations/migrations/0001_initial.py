@@ -9,7 +9,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -18,44 +17,117 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Organization',
+            name="Organization",
             fields=[
-                ('id', models.CharField(default=common.models.generate_ksuid, editable=False, max_length=30, primary_key=True, serialize=False)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('slug', models.SlugField(blank=True, unique=True, validators=[django.core.validators.RegexValidator(message='Slug must be a valid RFC 1123 hostname (lowercase alphanumeric characters and hyphens, starting and ending with an alphanumeric character).', regex='^[a-z0-9]([-a-z0-9]*[a-z0-9])?$')])),
-                ('region', models.CharField(choices=[('us-east-1', 'US East (N. Virginia)'), ('us-east-2', 'US East (Ohio)'), ('us-west-1', 'US West (N. California)'), ('us-west-2', 'US West (Oregon)')], default='us-east-1', max_length=20)),
-                ('deploy_headlamp', models.BooleanField(default=False)),
-                ('nuon_install_id', models.CharField(blank=True, max_length=255, null=True)),
-                ('nuon_install', models.JSONField(blank=True, null=True)),
-                ('nuon_install_state', models.JSONField(blank=True, null=True)),
-                ('nuon_install_stack', models.JSONField(blank=True, null=True)),
-                ('nuon_workflows', models.JSONField(blank=True, null=True)),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='created_organizations', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.CharField(
+                        default=common.models.generate_ksuid,
+                        editable=False,
+                        max_length=30,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "slug",
+                    models.SlugField(
+                        blank=True,
+                        unique=True,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="Slug must be a valid RFC 1123 hostname (lowercase alphanumeric characters and hyphens, starting and ending with an alphanumeric character).",
+                                regex="^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                            )
+                        ],
+                    ),
+                ),
+                (
+                    "region",
+                    models.CharField(
+                        choices=[
+                            ("us-east-1", "US East (N. Virginia)"),
+                            ("us-east-2", "US East (Ohio)"),
+                            ("us-west-1", "US West (N. California)"),
+                            ("us-west-2", "US West (Oregon)"),
+                        ],
+                        default="us-east-1",
+                        max_length=20,
+                    ),
+                ),
+                ("deploy_headlamp", models.BooleanField(default=False)),
+                (
+                    "nuon_install_id",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("nuon_install", models.JSONField(blank=True, null=True)),
+                ("nuon_install_state", models.JSONField(blank=True, null=True)),
+                ("nuon_install_stack", models.JSONField(blank=True, null=True)),
+                ("nuon_workflows", models.JSONField(blank=True, null=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="created_organizations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(models.Model, organizations.nuon.NuonInstallMixin),
         ),
         migrations.CreateModel(
-            name='OrganizationMember',
+            name="OrganizationMember",
             fields=[
-                ('id', models.CharField(default=common.models.generate_ksuid, editable=False, max_length=30, primary_key=True, serialize=False)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('role', models.CharField(choices=[('manager', 'Manager'), ('operator', 'Operator')], default='operator', max_length=20)),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='organizations.organization')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.CharField(
+                        default=common.models.generate_ksuid,
+                        editable=False,
+                        max_length=30,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[("manager", "Manager"), ("operator", "Operator")],
+                        default="operator",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="organizations.organization",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('organization', 'user')},
+                "unique_together": {("organization", "user")},
             },
         ),
         migrations.AddField(
-            model_name='organization',
-            name='members',
-            field=models.ManyToManyField(through='organizations.OrganizationMember', to=settings.AUTH_USER_MODEL),
+            model_name="organization",
+            name="members",
+            field=models.ManyToManyField(
+                through="organizations.OrganizationMember", to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

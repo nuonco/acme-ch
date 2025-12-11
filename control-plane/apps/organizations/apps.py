@@ -7,4 +7,3 @@ class OrganizationConfig(AppConfig):
 
     def ready(self):
         import organizations.signals  # noqa
-
