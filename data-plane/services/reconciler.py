@@ -417,6 +417,20 @@ class Reconciler:
                     ingress_manifest=ingress_manifest,
                 )
 
+                # Send password to control plane if cluster has credentials
+                if needs_credentials:
+                    password = self._get_cluster_password(cluster)
+                    if password:
+                        try:
+                            self.api_service.set_cluster_password(
+                                cluster_id=cluster_id,
+                                password=password,
+                            )
+                        except Exception as e:
+                            print(
+                                f"Warning: Failed to send password for cluster {cluster_id}: {e}"
+                            )
+
             return ReconcileResult(
                 cluster_id=cluster_id,
                 cluster_name=cluster_name,
@@ -502,6 +516,41 @@ class Reconciler:
 
         except K8sServiceError:
             return False
+
+    def _get_cluster_password(self, cluster: dict[str, Any]) -> str | None:
+        """Get the password from the cluster's Kubernetes secret.
+
+        Args:
+            cluster: ClickHouse cluster data
+
+        Returns:
+            Password string if secret exists, None otherwise
+        """
+        import base64
+
+        try:
+            namespace = self._get_cluster_namespace(cluster)
+            if not namespace:
+                return None
+
+            secret = self.k8s_service.get_resource(
+                kind="Secret",
+                name="clickhouse-cluster-pw",
+                namespace=namespace,
+                api_version="v1",
+            )
+            if not secret:
+                return None
+
+            data = secret.get("data", {})
+            encoded_password = data.get("value")
+            if not encoded_password:
+                return None
+
+            return base64.b64decode(encoded_password).decode("utf-8")
+
+        except (K8sServiceError, Exception):
+            return None
 
     def _delete_cluster(self, cluster: dict[str, Any]) -> ReconcileResult:
         """Delete a ClickHouse cluster from Kubernetes.
