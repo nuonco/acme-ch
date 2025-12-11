@@ -9,6 +9,7 @@ from kubernetes.client.rest import ApiException
 
 class K8sServiceError(Exception):
     """Raised when Kubernetes operation fails."""
+
     pass
 
 
@@ -38,7 +39,9 @@ class K8sService:
         except Exception as e:
             raise K8sServiceError(f"Failed to initialize K8s client: {str(e)}") from e
 
-    def apply_manifest(self, manifest: str, namespace: str | None = None) -> dict[str, Any]:
+    def apply_manifest(
+        self, manifest: str, namespace: str | None = None
+    ) -> dict[str, Any]:
         """Apply a Kubernetes manifest (create or update).
 
         Args:
@@ -84,13 +87,19 @@ class K8sService:
             elif kind == "Ingress":
                 return self._apply_ingress(resource, namespace)
             elif kind == "EC2NodeClass":
-                return self._apply_cluster_scoped_custom_resource(resource, "ec2nodeclasses")
+                return self._apply_cluster_scoped_custom_resource(
+                    resource, "ec2nodeclasses"
+                )
             elif kind == "NodePool":
                 return self._apply_cluster_scoped_custom_resource(resource, "nodepools")
             elif kind in ("ClickHouseInstallation", "CHI"):
-                return self._apply_custom_resource(resource, namespace, "clickhouseinstallations")
+                return self._apply_custom_resource(
+                    resource, namespace, "clickhouseinstallations"
+                )
             elif kind in ("ClickHouseKeeper", "CHK"):
-                return self._apply_custom_resource(resource, namespace, "clickhousekeepers")
+                return self._apply_custom_resource(
+                    resource, namespace, "clickhousekeepers"
+                )
             else:
                 # Generic custom resource or unsupported type
                 return self._apply_custom_resource(resource, namespace)
@@ -103,6 +112,7 @@ class K8sService:
             if e.body:
                 try:
                     import json
+
                     body = json.loads(e.body)
                     if "message" in body:
                         error_msg += f"\n{body['message']}"
@@ -136,15 +146,27 @@ class K8sService:
             self.core_v1.read_namespaced_secret(name, namespace)
             # Update existing
             result = self.core_v1.patch_namespaced_secret(name, namespace, resource)
-            return {"action": "updated", "kind": "Secret", "name": name, "namespace": namespace}
+            return {
+                "action": "updated",
+                "kind": "Secret",
+                "name": name,
+                "namespace": namespace,
+            }
         except ApiException as e:
             if e.status == 404:
                 # Create new
                 result = self.core_v1.create_namespaced_secret(namespace, resource)
-                return {"action": "created", "kind": "Secret", "name": name, "namespace": namespace}
+                return {
+                    "action": "created",
+                    "kind": "Secret",
+                    "name": name,
+                    "namespace": namespace,
+                }
             raise
 
-    def _apply_service(self, resource: dict[str, Any], namespace: str) -> dict[str, Any]:
+    def _apply_service(
+        self, resource: dict[str, Any], namespace: str
+    ) -> dict[str, Any]:
         """Apply service resource."""
         name = resource["metadata"]["name"]
         try:
@@ -152,28 +174,54 @@ class K8sService:
             self.core_v1.read_namespaced_service(name, namespace)
             # Update existing
             result = self.core_v1.patch_namespaced_service(name, namespace, resource)
-            return {"action": "updated", "kind": "Service", "name": name, "namespace": namespace}
+            return {
+                "action": "updated",
+                "kind": "Service",
+                "name": name,
+                "namespace": namespace,
+            }
         except ApiException as e:
             if e.status == 404:
                 # Create new
                 result = self.core_v1.create_namespaced_service(namespace, resource)
-                return {"action": "created", "kind": "Service", "name": name, "namespace": namespace}
+                return {
+                    "action": "created",
+                    "kind": "Service",
+                    "name": name,
+                    "namespace": namespace,
+                }
             raise
 
-    def _apply_ingress(self, resource: dict[str, Any], namespace: str) -> dict[str, Any]:
+    def _apply_ingress(
+        self, resource: dict[str, Any], namespace: str
+    ) -> dict[str, Any]:
         """Apply ingress resource."""
         name = resource["metadata"]["name"]
         try:
             # Try to get existing ingress
             self.networking_v1.read_namespaced_ingress(name, namespace)
             # Update existing
-            result = self.networking_v1.patch_namespaced_ingress(name, namespace, resource)
-            return {"action": "updated", "kind": "Ingress", "name": name, "namespace": namespace}
+            result = self.networking_v1.patch_namespaced_ingress(
+                name, namespace, resource
+            )
+            return {
+                "action": "updated",
+                "kind": "Ingress",
+                "name": name,
+                "namespace": namespace,
+            }
         except ApiException as e:
             if e.status == 404:
                 # Create new
-                result = self.networking_v1.create_namespaced_ingress(namespace, resource)
-                return {"action": "created", "kind": "Ingress", "name": name, "namespace": namespace}
+                result = self.networking_v1.create_namespaced_ingress(
+                    namespace, resource
+                )
+                return {
+                    "action": "created",
+                    "kind": "Ingress",
+                    "name": name,
+                    "namespace": namespace,
+                }
             raise
 
     def _apply_cluster_scoped_custom_resource(
@@ -221,7 +269,12 @@ class K8sService:
                     plural=plural,
                     body=resource,
                 )
-                return {"action": "created", "kind": kind, "name": name, "namespace": None}
+                return {
+                    "action": "created",
+                    "kind": kind,
+                    "name": name,
+                    "namespace": None,
+                }
             raise
 
     def _apply_custom_resource(
@@ -261,7 +314,12 @@ class K8sService:
                 name=name,
                 body=resource,
             )
-            return {"action": "updated", "kind": kind, "name": name, "namespace": namespace}
+            return {
+                "action": "updated",
+                "kind": kind,
+                "name": name,
+                "namespace": namespace,
+            }
         except ApiException as e:
             if e.status == 404:
                 # Create new
@@ -272,11 +330,20 @@ class K8sService:
                     plural=plural,
                     body=resource,
                 )
-                return {"action": "created", "kind": kind, "name": name, "namespace": namespace}
+                return {
+                    "action": "created",
+                    "kind": kind,
+                    "name": name,
+                    "namespace": namespace,
+                }
             raise
 
     def get_resource(
-        self, kind: str, name: str, namespace: str | None = None, api_version: str = "v1"
+        self,
+        kind: str,
+        name: str,
+        namespace: str | None = None,
+        api_version: str = "v1",
     ) -> dict[str, Any] | None:
         """Get a Kubernetes resource.
 
@@ -318,7 +385,11 @@ class K8sService:
             elif kind in ("ClickHouseInstallation", "CHI"):
                 if not namespace:
                     raise K8sServiceError("Namespace required for CHI")
-                group, version = api_version.split("/", 1) if "/" in api_version else ("", api_version)
+                group, version = (
+                    api_version.split("/", 1)
+                    if "/" in api_version
+                    else ("", api_version)
+                )
                 result = self.custom_objects.get_namespaced_custom_object(
                     group=group,
                     version=version,
@@ -331,7 +402,11 @@ class K8sService:
             elif kind in ("ClickHouseKeeper", "CHK"):
                 if not namespace:
                     raise K8sServiceError("Namespace required for CHK")
-                group, version = api_version.split("/", 1) if "/" in api_version else ("", api_version)
+                group, version = (
+                    api_version.split("/", 1)
+                    if "/" in api_version
+                    else ("", api_version)
+                )
                 result = self.custom_objects.get_namespaced_custom_object(
                     group=group,
                     version=version,
@@ -350,7 +425,11 @@ class K8sService:
             raise K8sServiceError(f"Failed to get {kind}/{name}: {str(e)}") from e
 
     def delete_resource(
-        self, kind: str, name: str, namespace: str | None = None, api_version: str = "v1"
+        self,
+        kind: str,
+        name: str,
+        namespace: str | None = None,
+        api_version: str = "v1",
     ) -> dict[str, Any]:
         """Delete a Kubernetes resource.
 
@@ -375,19 +454,37 @@ class K8sService:
                 if not namespace:
                     raise K8sServiceError("Namespace required for Service")
                 self.core_v1.delete_namespaced_service(name, namespace)
-                return {"action": "deleted", "kind": kind, "name": name, "namespace": namespace}
+                return {
+                    "action": "deleted",
+                    "kind": kind,
+                    "name": name,
+                    "namespace": namespace,
+                }
 
             elif kind == "Ingress":
                 if not namespace:
                     raise K8sServiceError("Namespace required for Ingress")
                 self.networking_v1.delete_namespaced_ingress(name, namespace)
-                return {"action": "deleted", "kind": kind, "name": name, "namespace": namespace}
+                return {
+                    "action": "deleted",
+                    "kind": kind,
+                    "name": name,
+                    "namespace": namespace,
+                }
 
             elif kind in ("ClickHouseInstallation", "CHI", "ClickHouseKeeper", "CHK"):
                 if not namespace:
                     raise K8sServiceError(f"Namespace required for {kind}")
-                group, version = api_version.split("/", 1) if "/" in api_version else ("", api_version)
-                plural = "clickhouseinstallations" if kind in ("ClickHouseInstallation", "CHI") else "clickhousekeepers"
+                group, version = (
+                    api_version.split("/", 1)
+                    if "/" in api_version
+                    else ("", api_version)
+                )
+                plural = (
+                    "clickhouseinstallations"
+                    if kind in ("ClickHouseInstallation", "CHI")
+                    else "clickhousekeepers"
+                )
                 self.custom_objects.delete_namespaced_custom_object(
                     group=group,
                     version=version,
@@ -395,7 +492,12 @@ class K8sService:
                     plural=plural,
                     name=name,
                 )
-                return {"action": "deleted", "kind": kind, "name": name, "namespace": namespace}
+                return {
+                    "action": "deleted",
+                    "kind": kind,
+                    "name": name,
+                    "namespace": namespace,
+                }
 
             else:
                 raise K8sServiceError(f"Unsupported resource kind: {kind}")

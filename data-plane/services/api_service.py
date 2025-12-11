@@ -8,6 +8,7 @@ from config import Config
 
 class APIServiceError(Exception):
     """Raised when API service operation fails."""
+
     pass
 
 
@@ -60,7 +61,9 @@ class APIService:
             client = self._get_client()
             return client.get_org_install()
         except APIError as e:
-            raise APIServiceError(f"Failed to get organization install: {e.message}") from e
+            raise APIServiceError(
+                f"Failed to get organization install: {e.message}"
+            ) from e
 
     def get_install_state(self) -> dict[str, Any]:
         """Get organization install state including Karpenter outputs.
@@ -75,7 +78,9 @@ class APIService:
             client = self._get_client()
             return client.get_org_install_state()
         except APIError as e:
-            raise APIServiceError(f"Failed to get organization install state: {e.message}") from e
+            raise APIServiceError(
+                f"Failed to get organization install state: {e.message}"
+            ) from e
 
     def get_clusters(self, cluster_id: str | None = None) -> list[dict[str, Any]]:
         """Get clusters for the organization.

@@ -11,7 +11,7 @@ from typing import Any
 import fire
 
 from config import ConfigError, get_config
-from services.reconciler import Reconciler, ReconcileStatus
+from services.reconciler import Reconciler, ReconcileStatus, SecretInfo
 
 
 class DataPlaneAgent:
@@ -69,10 +69,17 @@ class DataPlaneAgent:
                 header_text.append("Starting reconciliation\n", style="bold cyan")
                 header_text.append(f"Organization: {self.config.org_id}\n")
                 if cluster_id:
-                    header_text.append(f"Filtering to cluster: {cluster_id}\n", style="yellow")
+                    header_text.append(
+                        f"Filtering to cluster: {cluster_id}\n", style="yellow"
+                    )
                 if dry_run:
-                    header_text.append("Mode: DRY-RUN (no changes will be applied)", style="yellow bold")
-                console.print(Panel(header_text, title="Reconciliation", border_style="cyan"))
+                    header_text.append(
+                        "Mode: DRY-RUN (no changes will be applied)",
+                        style="yellow bold",
+                    )
+                console.print(
+                    Panel(header_text, title="Reconciliation", border_style="cyan")
+                )
                 console.print()
 
             # Create reconciler
@@ -85,7 +92,11 @@ class DataPlaneAgent:
             )
 
             # Build results table
-            table = Table(show_header=True, header_style="bold magenta", title="Reconciliation Results")
+            table = Table(
+                show_header=True,
+                header_style="bold magenta",
+                title="Reconciliation Results",
+            )
             table.add_column("Status", style="dim", width=10)
             table.add_column("Cluster Name", style="cyan")
             table.add_column("Message", style="white")
@@ -116,15 +127,33 @@ class DataPlaneAgent:
             console.print(table)
             console.print()
 
+            # Always show secret info (regardless of verbosity)
+            for result in results:
+                if result.secret_info:
+                    secret = result.secret_info
+                    if secret.created:
+                        console.print(
+                            f"[green]Secret created:[/green] {secret.name} in namespace {secret.namespace}"
+                        )
+                    else:
+                        console.print(
+                            f"[dim]Secret exists:[/dim] {secret.name} in namespace {secret.namespace}"
+                        )
+            console.print()
+
             # Show manifest details for each cluster
             for result in results:
-                if result.manifest_results and (verbose or result.status == ReconcileStatus.FAILED):
+                if result.manifest_results and (
+                    verbose or result.status == ReconcileStatus.FAILED
+                ):
                     # Create manifest details table
                     manifest_table = Table(
                         show_header=True,
                         header_style="bold cyan",
                         title=f"{result.cluster_name} - Manifest Details",
-                        border_style="cyan" if result.status == ReconcileStatus.SUCCESS else "red"
+                        border_style="cyan"
+                        if result.status == ReconcileStatus.SUCCESS
+                        else "red",
                     )
                     manifest_table.add_column("Kind", style="white", width=20)
                     manifest_table.add_column("Name", style="cyan", width=25)
@@ -144,7 +173,7 @@ class DataPlaneAgent:
                             manifest_result.kind,
                             manifest_result.name,
                             manifest_result.action,
-                            status_symbol
+                            status_symbol,
                         )
 
                         # Show error details if present and verbose
@@ -154,31 +183,25 @@ class DataPlaneAgent:
                             max_width = 80
                             if len(error_msg) > max_width:
                                 # Split by newlines first, then by width
-                                lines = error_msg.split('\n')
+                                lines = error_msg.split("\n")
                                 for line in lines[:10]:  # Show first 10 lines
                                     if len(line) > max_width:
                                         # Wrap long lines
                                         for i in range(0, len(line), max_width):
-                                            chunk = line[i:i+max_width]
+                                            chunk = line[i : i + max_width]
                                             manifest_table.add_row(
-                                                "",
-                                                Text(chunk, style="red dim"),
-                                                "",
-                                                ""
+                                                "", Text(chunk, style="red dim"), "", ""
                                             )
                                     else:
                                         manifest_table.add_row(
-                                            "",
-                                            Text(line, style="red dim"),
-                                            "",
-                                            ""
+                                            "", Text(line, style="red dim"), "", ""
                                         )
                             else:
                                 manifest_table.add_row(
                                     "",
                                     Text(f"Error: {error_msg}", style="red dim"),
                                     "",
-                                    ""
+                                    "",
                                 )
 
                     console.print(manifest_table)
@@ -188,12 +211,20 @@ class DataPlaneAgent:
             summary_text = Text()
             summary_text.append(f"Success: {success_count}", style="green bold")
             summary_text.append(" | ")
-            summary_text.append(f"Failed: {failed_count}", style="red bold" if failed_count > 0 else "dim")
+            summary_text.append(
+                f"Failed: {failed_count}",
+                style="red bold" if failed_count > 0 else "dim",
+            )
             summary_text.append(" | ")
-            summary_text.append(f"Skipped: {skipped_count}", style="yellow" if skipped_count > 0 else "dim")
+            summary_text.append(
+                f"Skipped: {skipped_count}",
+                style="yellow" if skipped_count > 0 else "dim",
+            )
 
             panel_style = "green" if failed_count == 0 else "red"
-            console.print(Panel(summary_text, title="Summary", border_style=panel_style))
+            console.print(
+                Panel(summary_text, title="Summary", border_style=panel_style)
+            )
 
             sys.exit(0 if failed_count == 0 else 1)
 

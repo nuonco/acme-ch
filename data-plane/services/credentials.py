@@ -7,6 +7,7 @@ from dataclasses import dataclass
 @dataclass
 class ClusterCredentials:
     """Credentials for a ClickHouse cluster."""
+
     username: str
     password: str
 

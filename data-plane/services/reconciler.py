@@ -20,6 +20,7 @@ from services.template_service import TemplateService, TemplateServiceError
 
 class ReconcileAction(Enum):
     """Action to take during reconciliation."""
+
     CREATE = "create"
     UPDATE = "update"
     DELETE = "delete"
@@ -28,6 +29,7 @@ class ReconcileAction(Enum):
 
 class ReconcileStatus(Enum):
     """Status of reconciliation operation."""
+
     SUCCESS = "success"
     FAILED = "failed"
     SKIPPED = "skipped"
@@ -36,6 +38,7 @@ class ReconcileStatus(Enum):
 @dataclass
 class ManifestResult:
     """Result of applying a single manifest."""
+
     kind: str
     name: str
     namespace: str | None
@@ -44,8 +47,18 @@ class ManifestResult:
 
 
 @dataclass
+class SecretInfo:
+    """Information about a secret created/checked during reconciliation."""
+
+    name: str
+    namespace: str
+    created: bool  # True if newly created, False if already existed
+
+
+@dataclass
 class ReconcileResult:
     """Result of a ClickHouse cluster reconciliation."""
+
     cluster_id: str
     cluster_name: str
     status: ReconcileStatus
@@ -53,10 +66,12 @@ class ReconcileResult:
     message: str
     error: Exception | None = None
     manifest_results: list[ManifestResult] = field(default_factory=list)
+    secret_info: SecretInfo | None = None
 
 
 class ReconcilerError(Exception):
     """Raised when reconciliation fails."""
+
     pass
 
 
@@ -141,7 +156,9 @@ class Reconciler:
             components = state.get("components", {})
             keeper = components.get("img_clickhouse_keeper", {}).get("outputs", {})
             server = components.get("img_clickhouse_server", {}).get("outputs", {})
-            certificate_arn = components.get("certificate", {}).get("outputs", {}).get("arn", "")
+            certificate_arn = (
+                components.get("certificate", {}).get("outputs", {}).get("arn", "")
+            )
 
             # Extract region from install_stack.outputs.region
             region = state.get("install_stack", {}).get("outputs", {}).get("region")
@@ -168,7 +185,14 @@ class Reconciler:
             # Step 4: Reconcile each ClickHouse cluster
             for cluster in clusters:
                 result = self._reconcile_cluster(
-                    cluster, org, karpenter, keeper, server, public_domain_name, certificate_arn, region
+                    cluster,
+                    org,
+                    karpenter,
+                    keeper,
+                    server,
+                    public_domain_name,
+                    certificate_arn,
+                    region,
                 )
                 results.append(result)
 
@@ -246,16 +270,29 @@ class Reconciler:
 
             # Determine if we need to generate credentials
             credentials = None
+            secret_info = None
             needs_credentials = cluster_type in (TYPE_SINGLE_NODE, TYPE_CLUSTER)
+            namespace = self._get_cluster_namespace(cluster) or cluster_name
+            secret_name = "clickhouse-cluster-pw"
 
-            if needs_credentials and not exists:
-                # Creating a new ClickHouse cluster that needs credentials
-                # Check if secret already exists
+            if needs_credentials:
                 secret_exists = self._secret_exists(cluster)
 
-                if not secret_exists:
-                    # Generate new credentials
+                if secret_exists:
+                    # Secret already exists, do nothing
+                    secret_info = SecretInfo(
+                        name=secret_name,
+                        namespace=namespace,
+                        created=False,
+                    )
+                else:
+                    # Generate new credentials for creation
                     credentials = generate_credentials()
+                    secret_info = SecretInfo(
+                        name=secret_name,
+                        namespace=namespace,
+                        created=True,
+                    )
 
             # ClickHouse cluster should exist - render K8s manifests
             manifests = self.template_service.render_cluster_manifests(
@@ -302,13 +339,15 @@ class Reconciler:
 
                 except Exception as parse_error:
                     # If we can't parse, record error and continue
-                    manifest_results.append(ManifestResult(
-                        kind="Unknown",
-                        name="unknown",
-                        namespace=cluster_name,
-                        action="failed",
-                        error=parse_error,
-                    ))
+                    manifest_results.append(
+                        ManifestResult(
+                            kind="Unknown",
+                            name="unknown",
+                            namespace=cluster_name,
+                            action="failed",
+                            error=parse_error,
+                        )
+                    )
                     continue
 
                 if not self.dry_run:
@@ -320,31 +359,37 @@ class Reconciler:
                         )
 
                         # Record success
-                        manifest_results.append(ManifestResult(
-                            kind=kind,
-                            name=name,
-                            namespace=namespace,
-                            action=result.get("action", "applied"),
-                            error=None,
-                        ))
+                        manifest_results.append(
+                            ManifestResult(
+                                kind=kind,
+                                name=name,
+                                namespace=namespace,
+                                action=result.get("action", "applied"),
+                                error=None,
+                            )
+                        )
                     except Exception as apply_error:
                         # Record failure but continue with remaining manifests
-                        manifest_results.append(ManifestResult(
+                        manifest_results.append(
+                            ManifestResult(
+                                kind=kind,
+                                name=name,
+                                namespace=namespace,
+                                action="failed",
+                                error=apply_error,
+                            )
+                        )
+                else:
+                    # Dry-run mode - record as "would apply"
+                    manifest_results.append(
+                        ManifestResult(
                             kind=kind,
                             name=name,
                             namespace=namespace,
-                            action="failed",
-                            error=apply_error,
-                        ))
-                else:
-                    # Dry-run mode - record as "would apply"
-                    manifest_results.append(ManifestResult(
-                        kind=kind,
-                        name=name,
-                        namespace=namespace,
-                        action="would apply",
-                        error=None,
-                    ))
+                            action="would apply",
+                            error=None,
+                        )
+                    )
 
             # Determine overall success based on manifest results
             failed_manifests = [m for m in manifest_results if m.action == "failed"]
@@ -357,7 +402,9 @@ class Reconciler:
                 if self.dry_run:
                     message = f"Would apply {len(manifest_results)} manifests (dry-run)"
                 else:
-                    message = f"All {len(manifest_results)} manifests applied successfully"
+                    message = (
+                        f"All {len(manifest_results)} manifests applied successfully"
+                    )
 
             # Send status update to control plane (not in dry-run mode)
             if not self.dry_run:
@@ -377,6 +424,7 @@ class Reconciler:
                 action=action,
                 message=message,
                 manifest_results=manifest_results,
+                secret_info=secret_info,
             )
 
         except (TemplateServiceError, K8sServiceError) as e:
@@ -558,4 +606,6 @@ class Reconciler:
 
         except Exception as e:
             # Log error but don't fail reconciliation
-            print(f"Warning: Failed to send status update for cluster {cluster_id}: {e}")
+            print(
+                f"Warning: Failed to send status update for cluster {cluster_id}: {e}"
+            )

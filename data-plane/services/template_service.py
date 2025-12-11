@@ -117,7 +117,11 @@ class TemplateService:
         return self.render_template("4-service.yaml", context)
 
     def render_ec2_nodeclass(
-        self, cluster: dict[str, Any], org: dict[str, Any], karpenter: dict[str, Any], region: str
+        self,
+        cluster: dict[str, Any],
+        org: dict[str, Any],
+        karpenter: dict[str, Any],
+        region: str,
     ) -> str:
         """Render EC2NodeClass manifest for a ClickHouse cluster.
 
@@ -135,11 +139,20 @@ class TemplateService:
         Raises:
             TemplateServiceError: If rendering fails
         """
-        context = {"cluster": cluster, "org": org, "karpenter": karpenter, "region": region}
+        context = {
+            "cluster": cluster,
+            "org": org,
+            "karpenter": karpenter,
+            "region": region,
+        }
         return self.render_template("1-ec2nc.yaml", context)
 
     def render_nodepool(
-        self, cluster: dict[str, Any], org: dict[str, Any], karpenter: dict[str, Any], region: str
+        self,
+        cluster: dict[str, Any],
+        org: dict[str, Any],
+        karpenter: dict[str, Any],
+        region: str,
     ) -> str:
         """Render NodePool manifest for a ClickHouse cluster.
 
@@ -157,7 +170,12 @@ class TemplateService:
         Raises:
             TemplateServiceError: If rendering fails
         """
-        context = {"cluster": cluster, "org": org, "karpenter": karpenter, "region": region}
+        context = {
+            "cluster": cluster,
+            "org": org,
+            "karpenter": karpenter,
+            "region": region,
+        }
         return self.render_template("2-nodepool.yaml", context)
 
     def render_ingress(
@@ -432,7 +450,9 @@ class TemplateService:
         ingress_type = cluster.get("ingress_type", None)
         if ingress_type in (INGRESS_PUBLIC, INGRESS_TAILNET):
             manifests.append(
-                self.render_ingress(cluster, ingress_type, public_domain_name, certificate_arn)
+                self.render_ingress(
+                    cluster, ingress_type, public_domain_name, certificate_arn
+                )
             )
 
         return manifests
