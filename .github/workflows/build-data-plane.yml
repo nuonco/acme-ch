@@ -62,7 +62,7 @@ jobs:
 
       - name: Build Nuon component
         if: github.event_name != 'pull_request'
-        uses: nuonco/actions-nuon@v1
+        uses: nuonco/actions-nuon@v0.2.0
         with:
           org_id: ${{ secrets.NUON_ORG_ID }}
           api_token: ${{ secrets.NUON_API_TOKEN }}
