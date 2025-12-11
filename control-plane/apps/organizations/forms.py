@@ -15,6 +15,7 @@ class OrganizationForm(forms.ModelForm):
             "deploy_headlamp",
             "deploy_tailscale",
             "enable_delegation",
+            "enable_cluster_access",
         ]
 
     def __init__(self, *args, **kwargs):

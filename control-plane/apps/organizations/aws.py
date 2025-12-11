@@ -11,10 +11,21 @@ class AWSInstallMixin:
     """
 
     def get_iam_client(self):
-        return boto3.client(
-            "iam",
+        sts = boto3.client(
+            "sts",
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        )
+        assumed = sts.assume_role(
+            RoleArn=settings.AWS_IAM_ROLE,
+            RoleSessionName="acme-ch-control-plane",
+        )
+        credentials = assumed["Credentials"]
+        return boto3.client(
+            "iam",
+            aws_access_key_id=credentials["AccessKeyId"],
+            aws_secret_access_key=credentials["SecretAccessKey"],
+            aws_session_token=credentials["SessionToken"],
         )
 
     def get_delegated_role_arn(self):
@@ -23,11 +34,11 @@ class AWSInstallMixin:
         """
         if not self.nuon_install_id:
             return None
-        # The delegated role ARN follows: arn:aws:iam::<account>:role/<install_id>-delegation
-        # This should come from the install's outputs/state
         state = self.nuon_install_state or {}
-        outputs = state.get("outputs", {})
-        return outputs.get("role_delegation_arn")
+        components = state.get("components", {})
+        role_delegation = components.get("role_delegation", {})
+        outputs = role_delegation.get("outputs", {})
+        return outputs.get("delegated_role_arn")
 
     def ensure_assumable(self):
         """
@@ -35,6 +46,11 @@ class AWSInstallMixin:
 
         If enable_delegation is False, removes the trust policy.
         If enable_delegation is True, adds the trust policy.
+
+        The role we have control over is settings.AWS_DELEGATED_ROLE.
+        This role has been given permission to assume the role from self.get_delegated_role_arn().
+
+        This method adds a policy on AWS_DELEGATED_ROLE.
         """
         if not settings.AWS_DELEGATED_ROLE:
             return
@@ -43,53 +59,34 @@ class AWSInstallMixin:
         if not delegated_role_arn:
             return
 
-        # Extract role name from ARN
-        role_name = delegated_role_arn.split("/")[-1]
+        vendor_role_name = settings.AWS_DELEGATED_ROLE.split("/")[-1]
+        policy_name = f"assume-{self.nuon_install_id}"
 
         iam = self.get_iam_client()
 
-        try:
-            response = iam.get_role(RoleName=role_name)
-            current_policy = response["Role"]["AssumeRolePolicyDocument"]
-        except iam.exceptions.NoSuchEntityException:
-            return
-
-        statements = current_policy.get("Statement", [])
-
-        # Find existing statement for our delegated role
-        vendor_principal = settings.AWS_DELEGATED_ROLE
-        existing_statement_idx = None
-        for idx, stmt in enumerate(statements):
-            principal = stmt.get("Principal", {})
-            if isinstance(principal, dict):
-                aws_principal = principal.get("AWS", [])
-                if isinstance(aws_principal, str):
-                    aws_principal = [aws_principal]
-                if vendor_principal in aws_principal:
-                    existing_statement_idx = idx
-                    break
-
         if not self.enable_delegation:
-            # Remove the trust policy if it exists
-            if existing_statement_idx is not None:
-                statements.pop(existing_statement_idx)
-                current_policy["Statement"] = statements
-                iam.update_assume_role_policy(
-                    RoleName=role_name,
-                    PolicyDocument=json.dumps(current_policy),
+            try:
+                iam.delete_role_policy(
+                    RoleName=vendor_role_name,
+                    PolicyName=policy_name,
                 )
+            except iam.exceptions.NoSuchEntityException:
+                pass
             return
 
-        # Add the trust policy if it doesn't exist
-        if existing_statement_idx is None:
-            new_statement = {
-                "Effect": "Allow",
-                "Principal": {"AWS": vendor_principal},
-                "Action": "sts:AssumeRole",
-            }
-            statements.append(new_statement)
-            current_policy["Statement"] = statements
-            iam.update_assume_role_policy(
-                RoleName=role_name,
-                PolicyDocument=json.dumps(current_policy),
-            )
+        policy_document = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": "sts:AssumeRole",
+                    "Resource": delegated_role_arn,
+                }
+            ],
+        }
+
+        iam.put_role_policy(
+            RoleName=vendor_role_name,
+            PolicyName=policy_name,
+            PolicyDocument=json.dumps(policy_document),
+        )

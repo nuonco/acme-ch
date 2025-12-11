@@ -294,6 +294,19 @@
           {% if form.enable_delegation.errors %}
           <p class="mt-2 text-sm text-red-400">{{ form.enable_delegation.errors.0 }}</p>
           {% endif %}
+
+          <div class="mt-6 relative flex gap-x-3" x-show="enableDelegatedAccess" x-transition>
+            <div class="flex h-6 items-center">
+              <input id="{{ form.enable_cluster_access.id_for_label }}" name="{{ form.enable_cluster_access.name }}" type="checkbox" {% if form.enable_cluster_access.value %}checked{% endif %} class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 bg-white/5 border-white/10">
+            </div>
+            <div class="text-sm/6">
+              <label for="{{ form.enable_cluster_access.id_for_label }}" class="font-medium text-white">Enable Cluster Access</label>
+              <p class="text-gray-400">Grant our delegated role AWS EKS Cluster admin access to your EKS cluster for advanced troubleshooting and support.</p>
+            </div>
+          </div>
+          {% if form.enable_cluster_access.errors %}
+          <p class="mt-2 text-sm text-red-400">{{ form.enable_cluster_access.errors.0 }}</p>
+          {% endif %}
         </div>
       </div>
     </div>

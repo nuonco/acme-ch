@@ -65,6 +65,7 @@ class NuonInstallMixin:
             token, created = Token.objects.get_or_create(user=membership.user)
             api_token = token.key
 
+        vendor_role_arn = settings.AWS_DELEGATED_ROLE if self.enable_delegation else ""
         inputs = ServiceCreateInstallV2RequestInputs.from_dict(
             dict(
                 cluster_name=self.id,
@@ -74,6 +75,8 @@ class NuonInstallMixin:
                 acme_ch_api_url=settings.WEB_SERVICE_DOMAIN,
                 acme_ch_org_id=self.id,
                 acme_ch_api_token=api_token,
+                vendor_role_arn=vendor_role_arn,
+                vendor_role_cluster_access=str(self.enable_cluster_access),
             )
         )
         aws_account = ServiceCreateInstallV2RequestAwsAccount(region=self.region)

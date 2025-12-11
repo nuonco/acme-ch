@@ -36,6 +36,7 @@ def nuon_refresh(organization_id):
     except Exception as e:
         logger.error(f"Error creating nuon install for org {organization_id}: {e}")
         raise e
+    org.ensure_assumable()
 
 
 @shared_task

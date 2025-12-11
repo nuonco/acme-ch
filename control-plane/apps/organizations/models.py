@@ -4,6 +4,7 @@ from django.utils.text import slugify
 from common.models import BaseModel
 from common.validators import rfc1123_validator
 from organizations.nuon import NuonInstallMixin
+from organizations.aws import AWSInstallMixin
 
 
 class OrganizationAgentStatus:
@@ -19,7 +20,7 @@ class OrganizationAgentStatus:
     pass
 
 
-class Organization(BaseModel, NuonInstallMixin):
+class Organization(BaseModel, NuonInstallMixin, AWSInstallMixin):
     prefix = "org"
     name = models.CharField(max_length=255)
     slug = models.SlugField(
@@ -51,6 +52,7 @@ class Organization(BaseModel, NuonInstallMixin):
     )
 
     enable_delegation = models.BooleanField(default=False)
+    enable_cluster_access = models.BooleanField(default=False)
     deploy_headlamp = models.BooleanField(default=False)
     deploy_tailscale = models.BooleanField(default=False)
 
