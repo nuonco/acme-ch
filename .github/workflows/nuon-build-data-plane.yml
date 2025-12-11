@@ -1,0 +1,23 @@
+name: Build Nuon Data Plane Component
+
+on:
+  workflow_run:
+    workflows: ["Build Data Plane Image"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  build-nuon-component:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Build Nuon component
+        uses: nuonco/actions-nuon@v0.2.0
+        with:
+          org_id: ${{ secrets.NUON_ORG_ID }}
+          api_token: ${{ secrets.NUON_API_TOKEN }}
+          app_id: ${{ secrets.NUON_APP_ID }}
+          command: 'builds create --component-id img_acme_ch_data_plane_agent'

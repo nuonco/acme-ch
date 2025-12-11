@@ -59,12 +59,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
-
-      - name: Build Nuon component
-        if: github.event_name != 'pull_request'
-        uses: nuonco/actions-nuon@v0.2.0
-        with:
-          org_id: ${{ secrets.NUON_ORG_ID }}
-          api_token: ${{ secrets.NUON_API_TOKEN }}
-          app_id: ${{ secrets.NUON_APP_ID }}
-          command: 'builds create --component-id img_acme_ch_data_plane_agent'
