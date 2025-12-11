@@ -28,9 +28,19 @@ output "eks_access_policy_arn" {
   value       = local.enabled ? aws_iam_policy.eks_cluster_access[0].arn : null
 }
 
+output "cluster_access_enabled" {
+  description = "Whether EKS cluster access (kubectl) is enabled for the delegated role"
+  value       = local.cluster_access_enabled
+}
+
 output "eks_access_entry_arn" {
   description = "ARN of the EKS access entry for the delegated role"
-  value       = local.enabled ? aws_eks_access_entry.delegated[0].access_entry_arn : null
+  value       = local.cluster_access_enabled ? aws_eks_access_entry.delegated[0].access_entry_arn : null
+}
+
+output "eks_access_entry_principal_arn" {
+  description = "Principal ARN of the EKS access entry"
+  value       = local.cluster_access_enabled ? aws_eks_access_entry.delegated[0].principal_arn : null
 }
 
 output "granted_permissions" {
@@ -55,10 +65,10 @@ output "granted_permissions" {
       modify_actions = ["autoscaling:SetDesiredCapacity", "autoscaling:UpdateAutoScalingGroup"]
       condition      = "aws:ResourceTag/install.nuon.co/id = ${var.nuon_id}"
     }
-    eks_access_entry = {
+    eks_access_entry = var.vendor_role_cluster_access ? {
       policy = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSEditPolicy"
       scope  = "cluster"
       note   = "Allows kubectl access and Karpenter NodePool scaling"
-    }
+    } : null
   } : null
 }

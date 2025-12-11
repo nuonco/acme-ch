@@ -24,6 +24,12 @@ variable "vendor_role_arn" {
   default     = ""
 }
 
+variable "vendor_role_cluster_access" {
+  description = "Whether to create an EKS access entry for the delegated role, allowing kubectl access to the cluster"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
