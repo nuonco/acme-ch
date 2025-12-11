@@ -19,6 +19,14 @@ display_name = "Organization Id"
 description  = "Org ID of the org we are creating the cluster for."
 type         = "string"
 
+[[input]]
+group        = "control_plane"
+name         = "enable_delegation"
+display_name = "Enable Role Delegation"
+description  = "Toggle on to enable role delegation."
+type         = "bool"
+default      = "false"
+
 [[input]] # TODO(fd): this can be a secret later
 group        = "control_plane"
 name         = "acme_ch_api_token"

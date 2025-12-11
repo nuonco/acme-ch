@@ -32,6 +32,10 @@ env = environ.Env(
     WEB_SERVICE_DOMAIN=(str, "localhost:8000"),
     GOOGLE_OAUTH_CLIENT_ID=(str, ""),
     GOOGLE_OAUTH_CLIENT_SECRET=(str, ""),
+    AWS_DELEGATED_ROLE=(str, ""),
+    AWS_IAM_ROLE=(str, ""),
+    AWS_ACCESS_KEY_ID=(str, ""),
+    AWS_SECRET_ACCESS_KEY=(str, ""),
     VERSION=(str, ""),
 )
 
@@ -204,6 +208,12 @@ NUON_API_URL = env("NUON_API_URL")
 NUON_API_TOKEN = env("NUON_API_TOKEN")
 NUON_ORG_ID = env("NUON_ORG_ID")
 NUON_APP_ID = env("NUON_APP_ID")
+
+# AWS Configuration
+AWS_DELEGATED_ROLE = env("AWS_DELEGATED_ROLE")
+AWS_IAM_ROLE = env("AWS_IAM_ROLE")
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
 
 # Web Service Configuration
 WEB_SERVICE_DOMAIN = env("WEB_SERVICE_DOMAIN")
