@@ -416,6 +416,7 @@ class DataPlaneAgent:
             # Render each cluster
             for idx, cluster in enumerate(clusters):
                 cluster_name = cluster.get("name", "unknown")
+                cluster_slug = cluster.get("slug", cluster_name)
                 cluster_type = cluster.get("cluster_type", "")
 
                 if idx > 0:
@@ -431,13 +432,13 @@ class DataPlaneAgent:
                 secret_exists = False
 
                 if needs_credentials:
-                    # Check if secret exists in k8s
+                    # Check if secret exists in k8s (using slug as namespace, matching templates)
                     if k8s_available:
                         try:
                             secret = k8s_service.get_resource(
                                 kind="Secret",
                                 name="clickhouse-cluster-pw",
-                                namespace=cluster_name,
+                                namespace=cluster_slug,
                                 api_version="v1",
                             )
                             secret_exists = secret is not None

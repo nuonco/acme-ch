@@ -389,6 +389,19 @@ class Reconciler:
                 error=e,
             )
 
+    def _get_cluster_namespace(self, cluster: dict[str, Any]) -> str | None:
+        """Get the Kubernetes namespace for a ClickHouse cluster.
+
+        Uses cluster.slug which matches the namespace used in templates.
+
+        Args:
+            cluster: ClickHouse cluster data
+
+        Returns:
+            Namespace string (cluster slug), or None if not available
+        """
+        return cluster.get("slug")
+
     def _cluster_exists(self, cluster: dict[str, Any]) -> bool:
         """Check if a ClickHouse cluster exists in Kubernetes.
 
@@ -401,16 +414,16 @@ class Reconciler:
             True if ClickHouse cluster's namespace exists, False otherwise
         """
         try:
-            cluster_name = cluster.get("name")
-            if not cluster_name:
+            namespace = self._get_cluster_namespace(cluster)
+            if not namespace:
                 return False
 
             # Check if namespace exists
-            namespace = self.k8s_service.get_resource(
+            ns = self.k8s_service.get_resource(
                 kind="Namespace",
-                name=cluster_name,
+                name=namespace,
             )
-            return namespace is not None
+            return ns is not None
 
         except K8sServiceError:
             return False
@@ -425,8 +438,8 @@ class Reconciler:
             True if secret exists, False otherwise
         """
         try:
-            cluster_name = cluster.get("name")
-            if not cluster_name:
+            namespace = self._get_cluster_namespace(cluster)
+            if not namespace:
                 return False
 
             # Try to get the secret
@@ -434,7 +447,7 @@ class Reconciler:
             secret = self.k8s_service.get_resource(
                 kind="Secret",
                 name="clickhouse-cluster-pw",
-                namespace=cluster_name,
+                namespace=namespace,
                 api_version="v1",
             )
             return secret is not None
@@ -455,6 +468,7 @@ class Reconciler:
         """
         cluster_id = cluster.get("id", "unknown")
         cluster_name = cluster.get("name", "unknown")
+        namespace = self._get_cluster_namespace(cluster) or cluster_name
 
         try:
             # Check if ClickHouse cluster exists
@@ -471,7 +485,7 @@ class Reconciler:
                 # Delete namespace (cascades to all CHI/CHK resources within)
                 self.k8s_service.delete_resource(
                     kind="Namespace",
-                    name=cluster_name,
+                    name=namespace,
                 )
                 message = "ClickHouse cluster deleted successfully"
             else:
