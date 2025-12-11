@@ -54,4 +54,4 @@ spec:
       taints:
         - effect: NoSchedule
           key: pool.acme-ch.co
-          value: { { cluster.slug } }
+          value: '{{ cluster.slug }}'

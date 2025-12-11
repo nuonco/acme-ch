@@ -6,7 +6,7 @@ metadata:
 spec:
   configuration:
     clusters:
-      - name: '{{ cluster.slug }}'
+      - name: 'cluster'
         layout:
           replicasCount: 2
           shardsCount: 1
@@ -15,7 +15,7 @@ spec:
           serviceTemplate: clickhouse-cluster
     users:
       'defaultuser/networks/ip': '0.0.0.0/0'
-      'defaultuser/password': "{{ cluster.id }}" # this is, after all, a demo
+      'defaultuser/password_': "{{ cluster.id }}" # this is, after all, a demo
     settings:
       logger/console: true
       logger/level: information
