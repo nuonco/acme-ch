@@ -4,13 +4,16 @@ type              = "terraform_module"
 terraform_version = "1.13.5"
 
 [public_repo]
-repo      = "nuonco/example-app-configs"
-directory = "cockroachdb/src/role_delegation"
+repo      = "nuonco/acme-ch"
+directory = "nuon/acme-ch-data-plane/src/role_delegation"
 branch    = "main"
 
 [vars]
+vendor_role_arn            = "{{ .nuon.install.inputs.vendor_role_arn }}"
+vendor_role_cluster_access = "{{ .nuon.install.inputs.vendor_role_cluster_access }}"
+
 region           = "{{ .nuon.install_stack.outputs.region }}"
-vendor_role_arn  = "{{ .nuon.install.inputs.vendor_role_arn }}"
 nuon_id          = "{{ .nuon.install.id }}"
 eks_cluster_name = "{{ .nuon.sandbox.outputs.cluster.name }}"
 eks_cluster_arn  = "{{ .nuon.sandbox.outputs.cluster.arn }}"
+

@@ -1,3 +1,15 @@
+additional_namespaces = [
+  "clickhouse",
+  "tailscale",
+  "acme-ch",
+]
+
+additional_tags = {
+  "app.nuon.co/name" = "acme-ch-data-plane"
+  "org.acme.sh/id" = "{{ .nuon.inputs.inputs.cluster_id }}"
+  acme = "true"
+}
+
 
 maintenance_role_eks_access_entry_policy_associations = {
   eks_admin = {
@@ -12,16 +24,4 @@ maintenance_role_eks_access_entry_policy_associations = {
       type = "cluster"
     }
   }
-}
-
-additional_namespaces = [
-  "clickhouse",
-  "tailscale",
-  "acme-ch",
-]
-
-additional_tags = {
-  "app.nuon.co/name" = "acme-ch-data-plane"
-  "org.acme.sh/id" = "{{ .nuon.inputs.inputs.cluster_id }}"
-  acme = "true"
 }

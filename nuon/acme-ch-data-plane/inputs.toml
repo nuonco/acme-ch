@@ -21,11 +21,18 @@ type         = "string"
 
 [[input]]
 group        = "control_plane"
-name         = "enable_delegation"
-display_name = "Enable Role Delegation"
-description  = "Toggle on to enable role delegation."
-type         = "bool"
+name         = "vendor_role_arn"
+description  = "ARN of the vendor's IAM role to grant cross-account access to this install's ECS cluster and logs. If provided, delegation will be enabled."
+default      = ""
+display_name = "Vendor Role ARN"
+
+[[input]]
+group        = "control_plane"
+name         = "vendor_role_cluster_access"
+description  = "Set to true if the vendor's role should be granted access to the EKS cluster."
 default      = "false"
+type         = "bool"
+display_name = "Vendor Role Cluster Access"
 
 [[input]] # TODO(fd): this can be a secret later
 group        = "control_plane"
