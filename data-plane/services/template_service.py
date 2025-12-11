@@ -19,7 +19,6 @@ from constants import (
     INGRESS_PUBLIC,
     INGRESS_TAILNET,
 )
-from services.credentials import ClusterCredentials
 
 
 class TemplateServiceError(Exception):
@@ -215,32 +214,6 @@ class TemplateService:
                 f"Expected {INGRESS_PUBLIC} or {INGRESS_TAILNET}"
             )
 
-    def render_secret(
-        self, cluster: dict[str, Any], credentials: ClusterCredentials
-    ) -> str:
-        """Render secret manifest for ClickHouse cluster credentials.
-
-        Args:
-            cluster: ClickHouse cluster data dictionary
-            credentials: Generated credentials
-
-        Returns:
-            Rendered Secret YAML
-
-        Raises:
-            TemplateServiceError: If rendering fails
-        """
-        context = {
-            "cluster": cluster,
-            "credentials": {
-                "username": credentials.username,
-                "password": credentials.password,
-            },
-        }
-
-        # Use shared secret template at root level
-        return self.render_template("3-secret.yaml", context)
-
     def render_chi_single_node(
         self,
         cluster: dict[str, Any],
@@ -249,7 +222,6 @@ class TemplateService:
         keeper: dict[str, Any],
         server: dict[str, Any],
         region: str,
-        credentials: ClusterCredentials | None = None,
     ) -> str:
         """Render single-node ClickHouse cluster manifest (CHI CRD).
 
@@ -260,7 +232,6 @@ class TemplateService:
             keeper: ClickHouse Keeper image outputs
             server: ClickHouse Server image outputs
             region: AWS region
-            credentials: Optional cluster credentials
 
         Returns:
             Rendered CHI YAML
@@ -276,12 +247,6 @@ class TemplateService:
             "server": server,
             "region": region,
         }
-        if credentials:
-            context["credentials"] = {
-                "username": credentials.username,
-                "password": credentials.password,
-            }
-        # Assuming template exists or will be created at this path
         return self.render_template("chi-single-node/chi.j2.yaml", context)
 
     def render_chi_cluster(
@@ -292,7 +257,6 @@ class TemplateService:
         keeper: dict[str, Any],
         server: dict[str, Any],
         region: str,
-        credentials: ClusterCredentials | None = None,
     ) -> str:
         """Render multi-node ClickHouse cluster manifest (CHI CRD) with keeper.
 
@@ -303,7 +267,6 @@ class TemplateService:
             keeper: ClickHouse Keeper image outputs
             server: ClickHouse Server image outputs
             region: AWS region
-            credentials: Optional cluster credentials
 
         Returns:
             Rendered CHI YAML
@@ -319,11 +282,6 @@ class TemplateService:
             "server": server,
             "region": region,
         }
-        if credentials:
-            context["credentials"] = {
-                "username": credentials.username,
-                "password": credentials.password,
-            }
         return self.render_template("chi-cluster/chi-cluster.j2.yaml", context)
 
     def render_chk_cluster(
@@ -371,7 +329,6 @@ class TemplateService:
         public_domain_name: str,
         certificate_arn: str,
         region: str,
-        credentials: ClusterCredentials | None = None,
     ) -> list[str]:
         """Render all K8s manifests needed for a ClickHouse cluster.
 
@@ -387,7 +344,6 @@ class TemplateService:
             public_domain_name: Public domain name for ingress
             certificate_arn: Certificate ARN for ingress
             region: AWS region
-            credentials: Optional credentials (required for CHI types if creating new ClickHouse cluster)
 
         Returns:
             List of rendered manifest strings
@@ -406,18 +362,14 @@ class TemplateService:
         # 3. NodePool
         manifests.append(self.render_nodepool(cluster, org, karpenter, region))
 
-        # 4. Secret (conditional - only if credentials provided)
-        # 5. CHI resources
-        # 6. CHK resources (conditional)
+        # 4. CHI resources
+        # 5. CHK resources (conditional)
         cluster_type = cluster.get("cluster_type", "")
 
         if cluster_type == TYPE_SINGLE_NODE:
-            if credentials:
-                # Render secret only if credentials provided (new cluster)
-                manifests.append(self.render_secret(cluster, credentials))
             manifests.append(
                 self.render_chi_single_node(
-                    cluster, org, karpenter, keeper, server, region, credentials
+                    cluster, org, karpenter, keeper, server, region
                 )
             )
         elif cluster_type == TYPE_KEEPER:
@@ -426,13 +378,8 @@ class TemplateService:
             )
         elif cluster_type == TYPE_CLUSTER:
             # Multi-node cluster with keeper
-            if credentials:
-                # Render secret only if credentials provided (new cluster)
-                manifests.append(self.render_secret(cluster, credentials))
             manifests.append(
-                self.render_chi_cluster(
-                    cluster, org, karpenter, keeper, server, region, credentials
-                )
+                self.render_chi_cluster(cluster, org, karpenter, keeper, server, region)
             )
             manifests.append(
                 self.render_chk_cluster(cluster, org, karpenter, keeper, server, region)
@@ -443,10 +390,10 @@ class TemplateService:
                 f"Expected {TYPE_SINGLE_NODE}, {TYPE_KEEPER}, or {TYPE_CLUSTER}"
             )
 
-        # 7. Service
+        # 6. Service
         manifests.append(self.render_service(cluster))
 
-        # 8. Ingress (conditional - only if ingress_type is public or tailnet)
+        # 7. Ingress (conditional - only if ingress_type is public or tailnet)
         ingress_type = cluster.get("ingress_type", None)
         if ingress_type in (INGRESS_PUBLIC, INGRESS_TAILNET):
             manifests.append(

@@ -219,24 +219,6 @@ class ACMEClient:
         response = client.post(url, json=payload)
         return self._handle_response(response)
 
-    def set_cluster_password(self, cluster_id: str, password: str) -> dict[str, Any]:
-        """Set the password for a specific cluster.
-
-        Args:
-            cluster_id: ID of the cluster
-            password: The password value to set
-
-        Returns:
-            Response data from the API
-
-        Raises:
-            APIError: If request fails
-        """
-        url = f"{self.config.get_clusters_url()}/{cluster_id}/set-password/"
-        client = self._get_client()
-        response = client.patch(url, json={"password": password})
-        return self._handle_response(response)
-
     def close(self):
         """Close the HTTP client."""
         if self._client:

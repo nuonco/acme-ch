@@ -147,27 +147,6 @@ class APIService:
                 f"Failed to update cluster {cluster_id} status: {e.message}"
             ) from e
 
-    def set_cluster_password(self, cluster_id: str, password: str) -> dict[str, Any]:
-        """Set the password for a specific cluster.
-
-        Args:
-            cluster_id: ID of the cluster
-            password: The password value to set
-
-        Returns:
-            Response data from the API
-
-        Raises:
-            APIServiceError: If request fails
-        """
-        try:
-            client = self._get_client()
-            return client.set_cluster_password(cluster_id=cluster_id, password=password)
-        except APIError as e:
-            raise APIServiceError(
-                f"Failed to set password for cluster {cluster_id}: {e.message}"
-            ) from e
-
     def close(self):
         """Close the underlying API client."""
         if self._client:

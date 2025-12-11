@@ -80,8 +80,6 @@ class K8sService:
             # Route to appropriate API based on kind
             if kind == "Namespace":
                 return self._apply_namespace(resource)
-            elif kind == "Secret":
-                return self._apply_secret(resource, namespace)
             elif kind == "Service":
                 return self._apply_service(resource, namespace)
             elif kind == "Ingress":
@@ -136,32 +134,6 @@ class K8sService:
                 # Create new
                 result = self.core_v1.create_namespace(resource)
                 return {"action": "created", "kind": "Namespace", "name": name}
-            raise
-
-    def _apply_secret(self, resource: dict[str, Any], namespace: str) -> dict[str, Any]:
-        """Apply secret resource."""
-        name = resource["metadata"]["name"]
-        try:
-            # Try to get existing secret
-            self.core_v1.read_namespaced_secret(name, namespace)
-            # Update existing
-            result = self.core_v1.patch_namespaced_secret(name, namespace, resource)
-            return {
-                "action": "updated",
-                "kind": "Secret",
-                "name": name,
-                "namespace": namespace,
-            }
-        except ApiException as e:
-            if e.status == 404:
-                # Create new
-                result = self.core_v1.create_namespaced_secret(namespace, resource)
-                return {
-                    "action": "created",
-                    "kind": "Secret",
-                    "name": name,
-                    "namespace": namespace,
-                }
             raise
 
     def _apply_service(
@@ -362,12 +334,6 @@ class K8sService:
         try:
             if kind == "Namespace":
                 result = self.core_v1.read_namespace(name)
-                return client.ApiClient().sanitize_for_serialization(result)
-
-            elif kind == "Secret":
-                if not namespace:
-                    raise K8sServiceError("Namespace required for Secret")
-                result = self.core_v1.read_namespaced_secret(name, namespace)
                 return client.ApiClient().sanitize_for_serialization(result)
 
             elif kind == "Service":

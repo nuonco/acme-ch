@@ -11,7 +11,7 @@ from typing import Any
 import fire
 
 from config import ConfigError, get_config
-from services.reconciler import Reconciler, ReconcileStatus, SecretInfo
+from services.reconciler import Reconciler, ReconcileStatus
 
 
 class DataPlaneAgent:
@@ -125,20 +125,6 @@ class DataPlaneAgent:
                         table.add_row(status_text, result.cluster_name, result.message)
 
             console.print(table)
-            console.print()
-
-            # Always show secret info (regardless of verbosity)
-            for result in results:
-                if result.secret_info:
-                    secret = result.secret_info
-                    if secret.created:
-                        console.print(
-                            f"[green]Secret created:[/green] {secret.name} in namespace {secret.namespace}"
-                        )
-                    else:
-                        console.print(
-                            f"[dim]Secret exists:[/dim] {secret.name} in namespace {secret.namespace}"
-                        )
             console.print()
 
             # Show manifest details for each cluster
@@ -380,9 +366,6 @@ class DataPlaneAgent:
         try:
             from services.api_service import APIService
             from services.template_service import TemplateService
-            from services.k8s_service import K8sService, K8sServiceError
-            from services.credentials import ClusterCredentials
-            from constants import TYPE_SINGLE_NODE, TYPE_CLUSTER
 
             # Fetch data from API
             api_service = APIService(config=self.config)
@@ -432,22 +415,9 @@ class DataPlaneAgent:
                 print("# No ClickHouse clusters found", file=sys.stderr)
                 sys.exit(0)
 
-            # Initialize k8s service to check for existing secrets
-            try:
-                k8s_service = K8sService(in_cluster=self.config.in_cluster)
-                k8s_available = True
-            except Exception as e:
-                if verbose:
-                    print(
-                        f"# K8s not available (will use placeholders for all secrets): {e}",
-                        file=sys.stderr,
-                    )
-                k8s_available = False
-
             # Render each cluster
             for idx, cluster in enumerate(clusters):
                 cluster_name = cluster.get("name", "unknown")
-                cluster_slug = cluster.get("slug", cluster_name)
                 cluster_type = cluster.get("cluster_type", "")
 
                 if idx > 0:
@@ -456,44 +426,6 @@ class DataPlaneAgent:
                 print("---")
                 print(f"# Cluster: {cluster_name} ({cluster_type})")
                 print("---")
-
-                # Determine if we need credentials
-                needs_credentials = cluster_type in (TYPE_SINGLE_NODE, TYPE_CLUSTER)
-                credentials = None
-                secret_exists = False
-
-                if needs_credentials:
-                    # Check if secret exists in k8s (using slug as namespace, matching templates)
-                    if k8s_available:
-                        try:
-                            secret = k8s_service.get_resource(
-                                kind="Secret",
-                                name="clickhouse-cluster-pw",
-                                namespace=cluster_slug,
-                                api_version="v1",
-                            )
-                            secret_exists = secret is not None
-                        except K8sServiceError:
-                            secret_exists = False
-
-                    if secret_exists:
-                        if verbose:
-                            print(
-                                f"# Secret already exists in cluster, would be skipped during reconcile",
-                                file=sys.stderr,
-                            )
-                        # Don't generate credentials, will skip secret in manifests
-                    else:
-                        # Use placeholder credentials
-                        credentials = ClusterCredentials(
-                            username="PLACEHOLDER_USERNAME",
-                            password="PLACEHOLDER_PASSWORD_24CH",
-                        )
-                        if verbose:
-                            print(
-                                f"# Using placeholder credentials (secret would be generated with random values)",
-                                file=sys.stderr,
-                            )
 
                 # Render manifests
                 manifests = template_service.render_cluster_manifests(
@@ -505,7 +437,6 @@ class DataPlaneAgent:
                     public_domain_name=public_domain_name,
                     certificate_arn=certificate_arn,
                     region=region,
-                    credentials=credentials if not secret_exists else None,
                 )
 
                 # Print manifests

@@ -14,13 +14,8 @@ spec:
           podTemplate: clickhouse-cluster
           serviceTemplate: clickhouse-cluster
     users:
-      # TODO: create secret for this
       'defaultuser/networks/ip': '0.0.0.0/0'
-      'defaultuser/password':
-        valueFrom:
-          secretKeyRef:
-            name: clickhouse-cluster-pw
-            key: value
+      'defaultuser/password': "{{ cluster.id }}" # this is, after all, a demo
     settings:
       logger/console: true
       logger/level: information

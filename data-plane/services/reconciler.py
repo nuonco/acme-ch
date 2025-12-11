@@ -13,7 +13,6 @@ import yaml
 
 from constants import TYPE_SINGLE_NODE, TYPE_CLUSTER, TYPE_KEEPER
 from services.api_service import APIService, APIServiceError
-from services.credentials import ClusterCredentials, generate_credentials
 from services.k8s_service import K8sService, K8sServiceError
 from services.template_service import TemplateService, TemplateServiceError
 
@@ -47,15 +46,6 @@ class ManifestResult:
 
 
 @dataclass
-class SecretInfo:
-    """Information about a secret created/checked during reconciliation."""
-
-    name: str
-    namespace: str
-    created: bool  # True if newly created, False if already existed
-
-
-@dataclass
 class ReconcileResult:
     """Result of a ClickHouse cluster reconciliation."""
 
@@ -66,7 +56,6 @@ class ReconcileResult:
     message: str
     error: Exception | None = None
     manifest_results: list[ManifestResult] = field(default_factory=list)
-    secret_info: SecretInfo | None = None
 
 
 class ReconcilerError(Exception):
@@ -268,32 +257,6 @@ class Reconciler:
                 action = ReconcileAction.CREATE
                 action_verb = "created"
 
-            # Determine if we need to generate credentials
-            credentials = None
-            secret_info = None
-            needs_credentials = cluster_type in (TYPE_SINGLE_NODE, TYPE_CLUSTER)
-            namespace = self._get_cluster_namespace(cluster) or cluster_name
-            secret_name = "clickhouse-cluster-pw"
-
-            if needs_credentials:
-                secret_exists = self._secret_exists(cluster)
-
-                if secret_exists:
-                    # Secret already exists, do nothing
-                    secret_info = SecretInfo(
-                        name=secret_name,
-                        namespace=namespace,
-                        created=False,
-                    )
-                else:
-                    # Generate new credentials for creation
-                    credentials = generate_credentials()
-                    secret_info = SecretInfo(
-                        name=secret_name,
-                        namespace=namespace,
-                        created=True,
-                    )
-
             # ClickHouse cluster should exist - render K8s manifests
             manifests = self.template_service.render_cluster_manifests(
                 cluster=cluster,
@@ -304,7 +267,6 @@ class Reconciler:
                 public_domain_name=public_domain_name,
                 certificate_arn=certificate_arn,
                 region=region,
-                credentials=credentials,
             )
 
             # Apply manifests individually and track results
@@ -417,20 +379,6 @@ class Reconciler:
                     ingress_manifest=ingress_manifest,
                 )
 
-                # Send password to control plane if cluster has credentials
-                if needs_credentials:
-                    password = self._get_cluster_password(cluster)
-                    if password:
-                        try:
-                            self.api_service.set_cluster_password(
-                                cluster_id=cluster_id,
-                                password=password,
-                            )
-                        except Exception as e:
-                            print(
-                                f"Warning: Failed to send password for cluster {cluster_id}: {e}"
-                            )
-
             return ReconcileResult(
                 cluster_id=cluster_id,
                 cluster_name=cluster_name,
@@ -438,7 +386,6 @@ class Reconciler:
                 action=action,
                 message=message,
                 manifest_results=manifest_results,
-                secret_info=secret_info,
             )
 
         except (TemplateServiceError, K8sServiceError) as e:
@@ -489,68 +436,6 @@ class Reconciler:
 
         except K8sServiceError:
             return False
-
-    def _secret_exists(self, cluster: dict[str, Any]) -> bool:
-        """Check if ClickHouse cluster credentials secret already exists in Kubernetes.
-
-        Args:
-            cluster: ClickHouse cluster data
-
-        Returns:
-            True if secret exists, False otherwise
-        """
-        try:
-            namespace = self._get_cluster_namespace(cluster)
-            if not namespace:
-                return False
-
-            # Try to get the secret
-            # Secret name is hardcoded in templates as "clickhouse-cluster-pw"
-            secret = self.k8s_service.get_resource(
-                kind="Secret",
-                name="clickhouse-cluster-pw",
-                namespace=namespace,
-                api_version="v1",
-            )
-            return secret is not None
-
-        except K8sServiceError:
-            return False
-
-    def _get_cluster_password(self, cluster: dict[str, Any]) -> str | None:
-        """Get the password from the cluster's Kubernetes secret.
-
-        Args:
-            cluster: ClickHouse cluster data
-
-        Returns:
-            Password string if secret exists, None otherwise
-        """
-        import base64
-
-        try:
-            namespace = self._get_cluster_namespace(cluster)
-            if not namespace:
-                return None
-
-            secret = self.k8s_service.get_resource(
-                kind="Secret",
-                name="clickhouse-cluster-pw",
-                namespace=namespace,
-                api_version="v1",
-            )
-            if not secret:
-                return None
-
-            data = secret.get("data", {})
-            encoded_password = data.get("value")
-            if not encoded_password:
-                return None
-
-            return base64.b64decode(encoded_password).decode("utf-8")
-
-        except (K8sServiceError, Exception):
-            return None
 
     def _delete_cluster(self, cluster: dict[str, Any]) -> ReconcileResult:
         """Delete a ClickHouse cluster from Kubernetes.
