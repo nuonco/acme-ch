@@ -83,7 +83,7 @@ class DataPlaneAgent:
                 console.print()
 
             # Create reconciler
-            reconciler = Reconciler(dry_run=dry_run)
+            reconciler = Reconciler(dry_run=dry_run, verbose=verbose)
 
             # Run reconciliation
             results = reconciler.reconcile_all_clusters(

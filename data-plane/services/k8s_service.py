@@ -196,6 +196,25 @@ class K8sService:
                 }
             raise
 
+    def get_ingress(self, name: str, namespace: str) -> dict[str, Any] | None:
+        """Get ingress resource from cluster with full status.
+
+        Args:
+            name: Ingress name
+            namespace: Namespace
+
+        Returns:
+            Ingress resource as dict (includes status with load balancer info),
+            or None if not found
+        """
+        try:
+            ingress = self.networking_v1.read_namespaced_ingress(name, namespace)
+            return ingress.to_dict()
+        except ApiException as e:
+            if e.status == 404:
+                return None
+            raise K8sServiceError(f"Failed to get ingress {name}: {str(e)}") from e
+
     def _apply_cluster_scoped_custom_resource(
         self, resource: dict[str, Any], plural: str | None = None
     ) -> dict[str, Any]:

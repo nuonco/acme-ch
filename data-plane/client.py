@@ -1,10 +1,23 @@
 """API client for ACME ClickHouse Control Plane."""
 
+import json
+from datetime import datetime
 from typing import Any
 
 import httpx
 
 from config import Config, get_config
+
+
+def _serialize_for_json(obj: Any) -> Any:
+    """Recursively convert non-serializable objects (like datetime) for JSON."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    if isinstance(obj, dict):
+        return {k: _serialize_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_serialize_for_json(item) for item in obj]
+    return obj
 
 
 class APIError(Exception):
@@ -208,11 +221,11 @@ class ACMEClient:
 
         payload = {"status": status}
         if ingress is not None:
-            payload["ingress"] = ingress
+            payload["ingress"] = _serialize_for_json(ingress)
         if chi is not None:
-            payload["chi"] = chi
+            payload["chi"] = _serialize_for_json(chi)
         if chk is not None:
-            payload["chk"] = chk
+            payload["chk"] = _serialize_for_json(chk)
         if errors is not None:
             payload["errors"] = errors
 

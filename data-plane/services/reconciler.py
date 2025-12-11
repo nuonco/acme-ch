@@ -83,6 +83,7 @@ class Reconciler:
         k8s_service: K8sService | None = None,
         template_service: TemplateService | None = None,
         dry_run: bool = False,
+        verbose: bool = False,
     ):
         """Initialize the reconciler.
 
@@ -91,6 +92,7 @@ class Reconciler:
             k8s_service: K8s service instance (creates default if None)
             template_service: Template service instance (creates default if None)
             dry_run: If True, don't apply changes to K8s
+            verbose: If True, output detailed debug information
         """
         from config import get_config
 
@@ -99,6 +101,7 @@ class Reconciler:
         self.k8s_service = k8s_service or K8sService(in_cluster=config.in_cluster)
         self.template_service = template_service or TemplateService()
         self.dry_run = dry_run
+        self.verbose = verbose
 
     def reconcile_all_clusters(
         self,
@@ -370,13 +373,32 @@ class Reconciler:
 
             # Send status update to control plane (not in dry-run mode)
             if not self.dry_run:
+                # Fetch actual ingress state from cluster (includes load balancer status)
+                ingress_state = None
+                if ingress_manifest:
+                    ingress_name = ingress_manifest.get("metadata", {}).get("name")
+                    ingress_ns = ingress_manifest.get("metadata", {}).get(
+                        "namespace", cluster_name
+                    )
+                    if ingress_name:
+                        ingress_state = self.k8s_service.get_ingress(
+                            ingress_name, ingress_ns
+                        )
+                        if self.verbose and ingress_state:
+                            import json
+
+                            print(
+                                f"\n=== Ingress State from K8s ({ingress_ns}/{ingress_name}) ==="
+                            )
+                            print(json.dumps(ingress_state, indent=2, default=str))
+
                 self._send_status_update(
                     cluster,
                     status,
                     failed_manifests,
                     chi_manifest=chi_manifest,
                     chk_manifest=chk_manifest,
-                    ingress_manifest=ingress_manifest,
+                    ingress_manifest=ingress_state,
                 )
 
             return ReconcileResult(
