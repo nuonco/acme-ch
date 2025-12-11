@@ -1,5 +1,8 @@
 FROM python:3.13-slim-trixie
 
+ARG VERSION=unknown
+ENV VERSION=${VERSION}
+
 WORKDIR /app
 
 # Install uv for faster dependency management
