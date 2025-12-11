@@ -7,10 +7,6 @@ on:
     paths:
       - 'control-plane/**'
       - '.github/workflows/build-control-plane.yml'
-  pull_request:
-    paths:
-      - 'control-plane/**'
-      - '.github/workflows/build-control-plane.yml'
   workflow_dispatch:
 
 env:

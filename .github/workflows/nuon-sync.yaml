@@ -1,11 +1,12 @@
 name: Nuon Sync
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Build Data Plane Image"]
+    types:
+      - completed
     branches:
       - main
-    paths:
-      - 'nuon/acme-ch-data-plane/**'
 
 jobs:
   sync:

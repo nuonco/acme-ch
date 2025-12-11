@@ -7,10 +7,6 @@ on:
     paths:
       - 'data-plane/**'
       - '.github/workflows/build-data-plane.yml'
-  pull_request:
-    paths:
-      - 'data-plane/**'
-      - '.github/workflows/build-data-plane.yml'
   workflow_dispatch:
 
 env:
