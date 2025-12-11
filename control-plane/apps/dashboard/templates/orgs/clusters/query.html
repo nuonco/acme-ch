@@ -1,0 +1,224 @@
+{% extends "dashboard-base.html" %}
+
+{% block title %}Query - {{ cluster.name }} - {{ organization.name }} - Acme CH{% endblock %}
+
+{% block header %}Query {{ cluster.name }}{% endblock %}
+
+{% block breadcrumbs %}
+<nav class="flex mb-4" aria-label="Breadcrumb">
+  <ol class="inline-flex items-center space-x-1 md:space-x-2">
+    <li class="inline-flex items-center">
+      <a href="{% url 'index' %}" class="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white">
+        <svg class="w-3 h-3 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+        </svg>
+        Organizations
+      </a>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <svg class="w-3 h-3 mx-1 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+        </svg>
+        <a href="{% url 'org-detail' organization.slug %}" class="ml-1 text-sm font-medium text-gray-400 hover:text-white md:ml-2">{{ organization.name }}</a>
+      </div>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <svg class="w-3 h-3 mx-1 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+        </svg>
+        <a href="{% url 'org-ch-clusters' organization.slug %}" class="ml-1 text-sm font-medium text-gray-400 hover:text-white md:ml-2">CH Clusters</a>
+      </div>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <svg class="w-3 h-3 mx-1 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="ml-1 text-sm font-medium text-gray-300 md:ml-2">{{ cluster.name }}</span>
+      </div>
+    </li>
+    <li>
+      <div class="flex items-center">
+        <svg class="w-3 h-3 mx-1 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="ml-1 text-sm font-medium text-gray-300 md:ml-2">Query</span>
+      </div>
+    </li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+{% with ingress=cluster.status.ingress hostname=cluster.cluster_status.get_ingress_hostname is_tailscale=cluster.cluster_status.is_tailscale_ingress %}
+{% if ingress %}
+<!-- Cluster Info Section -->
+<div class="mb-8">
+    <div class="overflow-hidden bg-gray-800 shadow sm:rounded-lg">
+        <div class="px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <span class="inline-flex items-center rounded-md bg-indigo-500/10 px-2 py-1 text-xs font-medium text-indigo-400 border border-indigo-500/20">
+                        {{ cluster.get_cluster_type_display }}
+                    </span>
+                    <span class="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-1 text-xs font-medium text-blue-400 border border-blue-500/20">
+                        {{ cluster.get_ingress_type_display }}
+                    </span>
+                    <span class="inline-flex items-center rounded-md bg-gray-700 px-2 py-1 text-xs font-medium text-gray-300">
+                        {{ ingress.kind|default:"Ingress" }}
+                    </span>
+                </div>
+                {% if hostname %}
+                <a href="https://{{ hostname }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 {% if is_tailscale %}text-indigo-400 hover:text-indigo-300{% else %}text-green-400 hover:text-green-300{% endif %}">
+                    {{ hostname }}
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                    </svg>
+                </a>
+                {% else %}
+                <span class="text-sm text-gray-400">Waiting for load balancer...</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Query Interface -->
+<div class="mb-8">
+    <div class="overflow-hidden bg-gray-800 shadow sm:rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-700">
+            <h3 class="text-lg font-semibold text-white">Query</h3>
+        </div>
+        <div class="px-6 py-4">
+            <div class="mb-4">
+                <textarea
+                    id="query-input"
+                    rows="6"
+                    class="block w-full rounded-md bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-white font-mono placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="SELECT 1">SELECT 1</textarea>
+            </div>
+            <div class="flex items-center gap-4 mb-4">
+                <button
+                    id="run-query-btn"
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-md bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+                    </svg>
+                    Run Query
+                </button>
+                <span id="query-status" class="text-sm text-gray-400"></span>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2">Results</label>
+                <textarea
+                    id="query-results"
+                    rows="12"
+                    readonly
+                    class="block w-full rounded-md bg-gray-900 border border-gray-700 px-3 py-2 text-sm text-gray-300 font-mono focus:outline-none"
+                    placeholder="Results will appear here..."></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    const hostname = '{{ hostname }}';
+    const username = 'defaultuser';
+    const password = '{{ cluster.id }}';
+
+    const queryInput = document.getElementById('query-input');
+    const runBtn = document.getElementById('run-query-btn');
+    const resultsArea = document.getElementById('query-results');
+    const statusSpan = document.getElementById('query-status');
+
+    async function runQuery() {
+        const query = queryInput.value.trim();
+        if (!query) {
+            resultsArea.value = 'Please enter a query.';
+            return;
+        }
+
+        runBtn.disabled = true;
+        statusSpan.textContent = 'Running...';
+        resultsArea.value = '';
+
+        try {
+            const url = `https://${hostname}/?user=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+            const startTime = performance.now();
+
+            const response = await fetch(url, {
+                method: 'POST',
+                body: query,
+                headers: {
+                    'Content-Type': 'text/plain',
+                }
+            });
+
+            const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
+            const text = await response.text();
+
+            if (response.ok) {
+                statusSpan.textContent = `Completed in ${elapsed}s`;
+                resultsArea.value = text || '(empty result)';
+            } else {
+                statusSpan.textContent = `Error (${response.status})`;
+                resultsArea.value = text || `HTTP ${response.status}`;
+            }
+        } catch (err) {
+            statusSpan.textContent = 'Error';
+            resultsArea.value = `Request failed: ${err.message}`;
+        } finally {
+            runBtn.disabled = false;
+        }
+    }
+
+    runBtn.addEventListener('click', runQuery);
+
+    queryInput.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            runQuery();
+        }
+    });
+})();
+</script>
+{% else %}
+<!-- No Ingress Placeholder -->
+<div class="text-center py-16">
+    <div class="mx-auto max-w-md">
+        <div class="mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-gray-700/50 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-gray-500">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+            </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">No Ingress Configured</h3>
+        <p class="text-sm text-gray-400 mb-4">
+            This cluster does not have a public or private ingress configured. The cluster is only accessible from within the Kubernetes environment.
+        </p>
+        <div class="flex flex-col gap-2 text-left bg-gray-800 rounded-lg p-4">
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-400">Cluster:</span>
+                <span class="text-sm text-white">{{ cluster.name }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-400">Type:</span>
+                <span class="inline-flex items-center rounded-md bg-indigo-500/10 px-2 py-1 text-xs font-medium text-indigo-400 border border-indigo-500/20">
+                    {{ cluster.get_cluster_type_display }}
+                </span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-400">Ingress:</span>
+                <span class="inline-flex items-center rounded-md bg-gray-700 px-2 py-1 text-xs font-medium text-gray-400 border border-gray-600">
+                    {{ cluster.get_ingress_type_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endwith %}
+{% endblock %}
