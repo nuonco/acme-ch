@@ -7,30 +7,83 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('organizations', '0001_initial'),
+        ("organizations", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CHCluster',
+            name="CHCluster",
             fields=[
-                ('id', models.CharField(default=common.models.generate_ksuid, editable=False, max_length=30, primary_key=True, serialize=False)),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(db_index=True, max_length=255)),
-                ('slug', models.SlugField(validators=[django.core.validators.RegexValidator(message='Slug must be a valid RFC 1123 hostname (lowercase alphanumeric characters and hyphens, starting and ending with an alphanumeric character).', regex='^[a-z0-9]([-a-z0-9]*[a-z0-9])?$')])),
-                ('cluster_type', models.CharField(choices=[('single_node', 'Single Node'), ('cluster', 'Cluster'), ('keeper', 'Keeper')], default='single_node', max_length=20)),
-                ('ingress_type', models.CharField(choices=[('none', 'No Ingress: accessible only from within cluster'), ('public', 'Public Ingress: accessible from the internet'), ('tailnet', 'Tailnet Ingress: accessible only via the tailnet')], default='none', max_length=20)),
-                ('status', models.JSONField(blank=True, default=dict, null=True)),
-                ('status_history', models.JSONField(blank=True, default=list, null=True)),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='ch_clusters', to='organizations.organization')),
+                (
+                    "id",
+                    models.CharField(
+                        default=common.models.generate_ksuid,
+                        editable=False,
+                        max_length=30,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(db_index=True, max_length=255)),
+                (
+                    "slug",
+                    models.SlugField(
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="Slug must be a valid RFC 1123 hostname (lowercase alphanumeric characters and hyphens, starting and ending with an alphanumeric character).",
+                                regex="^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                            )
+                        ]
+                    ),
+                ),
+                (
+                    "cluster_type",
+                    models.CharField(
+                        choices=[
+                            ("single_node", "Single Node"),
+                            ("cluster", "Cluster"),
+                            ("keeper", "Keeper"),
+                        ],
+                        default="single_node",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "ingress_type",
+                    models.CharField(
+                        choices=[
+                            ("none", "No Ingress: accessible only from within cluster"),
+                            ("public", "Public Ingress: accessible from the internet"),
+                            (
+                                "tailnet",
+                                "Tailnet Ingress: accessible only via the tailnet",
+                            ),
+                        ],
+                        default="none",
+                        max_length=20,
+                    ),
+                ),
+                ("status", models.JSONField(blank=True, default=dict, null=True)),
+                (
+                    "status_history",
+                    models.JSONField(blank=True, default=list, null=True),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="ch_clusters",
+                        to="organizations.organization",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('organization', 'slug')},
+                "unique_together": {("organization", "slug")},
             },
         ),
     ]

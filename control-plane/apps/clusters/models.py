@@ -74,8 +74,9 @@ class CHClusterStatus:
         Get the load balancer hostname from the ingress status.
 
         Returns the hostname from:
-        1. status.loadBalancer.ingress[0].hostname (first priority)
-        2. metadata.annotations["external-dns.alpha.kubernetes.io/hostname"] (fallback)
+        1. status.load_balancer.ingress[0].hostname (Tailscale snake_case format)
+        2. status.loadBalancer.ingress[0].hostname (standard camelCase format)
+        3. metadata.annotations["external-dns.alpha.kubernetes.io/hostname"] (fallback)
 
         Returns None if ingress is not present or hostname is not found.
         """
@@ -83,8 +84,19 @@ class CHClusterStatus:
             return None
 
         try:
-            # First try to get hostname from load balancer ingress list
-            load_balancer = self.ingress.get("status", {}).get("loadBalancer", {})
+            status = self.ingress.get("status", {})
+
+            # Try Tailscale format (snake_case: load_balancer)
+            load_balancer = status.get("load_balancer", {})
+            ingress_list = load_balancer.get("ingress", [])
+
+            if ingress_list and len(ingress_list) > 0:
+                hostname = ingress_list[0].get("hostname")
+                if hostname:
+                    return hostname
+
+            # Try standard k8s format (camelCase: loadBalancer)
+            load_balancer = status.get("loadBalancer", {})
             ingress_list = load_balancer.get("ingress", [])
 
             if ingress_list and len(ingress_list) > 0:
@@ -94,7 +106,9 @@ class CHClusterStatus:
 
             # Fallback to external-dns annotation if present
             annotations = self.ingress.get("metadata", {}).get("annotations", {})
-            external_dns_hostname = annotations.get("external-dns.alpha.kubernetes.io/hostname")
+            external_dns_hostname = annotations.get(
+                "external-dns.alpha.kubernetes.io/hostname"
+            )
             if external_dns_hostname:
                 return external_dns_hostname
 
@@ -102,6 +116,14 @@ class CHClusterStatus:
             return None
 
         return None
+
+    def is_tailscale_ingress(self) -> bool:
+        """Check if the ingress is a Tailscale ingress."""
+        if not self.ingress:
+            return False
+
+        ingress_class = self.ingress.get("spec", {}).get("ingressClassName", "")
+        return "tailscale" in ingress_class.lower()
 
 
 class CHCluster(BaseModel):
@@ -128,7 +150,9 @@ class CHCluster(BaseModel):
     ]
 
     organization = models.ForeignKey(
-        "organizations.Organization", on_delete=models.CASCADE, related_name="ch_clusters"
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        related_name="ch_clusters",
     )
     name = models.CharField(max_length=255, db_index=True)
     slug = models.SlugField(validators=[rfc1123_validator])

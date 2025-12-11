@@ -255,6 +255,48 @@
         </div>
       </div>
     </div>
+
+    <!-- Delegated Access Section -->
+    <div class="grid grid-cols-1 gap-x-8 gap-y-10 border-b border-white/10 pb-12 md:grid-cols-3" x-data="{ enableDelegatedAccess: {{ form.enable_delegation.value|yesno:'true,false' }} }">
+      <div>
+        <h2 class="text-base/7 font-semibold text-white">Delegated Access</h2>
+        <p class="mt-1 text-sm/6 text-gray-400">Allow our team to access your cluster for support and troubleshooting.</p>
+      </div>
+
+      <div class="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6 md:col-span-2">
+        <div class="col-span-full">
+          <div class="rounded-lg bg-amber-500/10 border border-amber-500/30 p-4" x-show="enableDelegatedAccess" x-transition>
+            <div class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+              </svg>
+              <div class="flex-1">
+                <h3 class="text-sm font-semibold text-amber-300 mb-2">Heads Up!</h3>
+                <p class="text-sm text-gray-300 mb-3">
+                  Enabling this option will create an IAM role in your AWS account that can be assumed by our support team (<code class="text-amber-300 bg-amber-500/20 px-1 py-0.5 rounded text-xs">{{ delegated_role_name }}</code>).
+                </p>
+                <p class="text-sm text-gray-300">
+                  This allows us to help you troubleshoot issues and provide hands-on support when needed. You can disable this at any time from your organization settings.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 relative flex gap-x-3">
+            <div class="flex h-6 items-center">
+              <input id="{{ form.enable_delegation.id_for_label }}" name="{{ form.enable_delegation.name }}" type="checkbox" {% if form.enable_delegation.value %}checked{% endif %} class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 bg-white/5 border-white/10" x-model="enableDelegatedAccess">
+            </div>
+            <div class="text-sm/6">
+              <label for="{{ form.enable_delegation.id_for_label }}" class="font-medium text-white">Enable Delegated Access</label>
+              <p class="text-gray-400">Allow our team to assume a role in your account for support purposes.</p>
+            </div>
+          </div>
+          {% if form.enable_delegation.errors %}
+          <p class="mt-2 text-sm text-red-400">{{ form.enable_delegation.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="mt-6 flex items-center justify-end gap-x-6">

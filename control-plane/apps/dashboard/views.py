@@ -36,6 +36,13 @@ class CreateOrg(LoginRequiredMixin, CreateView):
     form_class = OrganizationForm
     template_name = "create-org.html"
 
+    def get_context_data(self, **kwargs):
+        from django.conf import settings
+
+        context = super().get_context_data(**kwargs)
+        context["delegated_role_name"] = settings.AWS_DELEGATED_ROLE
+        return context
+
     def form_valid(self, form):
         # Set the creator
         form.instance.created_by = self.request.user
@@ -353,6 +360,25 @@ class OrganizationCHClusterList(LoginRequiredMixin, ListView):
         return CHCluster.objects.filter(organization=self.organization).order_by(
             "-created_on"
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["organization"] = self.organization
+        return context
+
+
+class CHClusterQuery(LoginRequiredMixin, DetailView):
+    model = CHCluster
+    template_name = "orgs/clusters/query.html"
+    slug_field = "slug"
+    slug_url_kwarg = "cluster_slug"
+    context_object_name = "cluster"
+
+    def get_queryset(self):
+        self.organization = get_object_or_404(
+            Organization, slug=self.kwargs["slug"], members=self.request.user
+        )
+        return CHCluster.objects.filter(organization=self.organization)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

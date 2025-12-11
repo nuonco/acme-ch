@@ -6,25 +6,40 @@ import json
 
 @admin.register(CHCluster)
 class CHClusterAdmin(admin.ModelAdmin):
-    list_display = ("name", "identifier", "organization", "cluster_type", "ingress_type", "status_display", "created_on")
+    list_display = (
+        "name",
+        "identifier",
+        "organization",
+        "cluster_type",
+        "ingress_type",
+        "status_display",
+        "created_on",
+    )
     list_filter = ("cluster_type", "ingress_type", "created_on")
     search_fields = ("name", "identifier", "slug", "organization__name")
-    readonly_fields = ("identifier", "name", "slug", "cluster_type", "ingress_type", "status_display", "status_json", "created_on", "updated_on")
+    readonly_fields = (
+        "identifier",
+        "name",
+        "slug",
+        "cluster_type",
+        "ingress_type",
+        "status_display",
+        "status_json",
+        "created_on",
+        "updated_on",
+    )
 
     fieldsets = (
-        ("Basic Information", {
-            "fields": ("organization", "name", "slug", "identifier")
-        }),
-        ("Configuration", {
-            "fields": ("cluster_type", "ingress_type")
-        }),
-        ("Status", {
-            "fields": ("status_display", "status_json")
-        }),
-        ("Timestamps", {
-            "fields": ("created_on", "updated_on"),
-            "classes": ("collapse",)
-        }),
+        (
+            "Basic Information",
+            {"fields": ("organization", "name", "slug", "identifier")},
+        ),
+        ("Configuration", {"fields": ("cluster_type", "ingress_type")}),
+        ("Status", {"fields": ("status_display", "status_json")}),
+        (
+            "Timestamps",
+            {"fields": ("created_on", "updated_on"), "classes": ("collapse",)},
+        ),
     )
 
     def status_display(self, obj):
