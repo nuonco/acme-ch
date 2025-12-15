@@ -26,7 +26,7 @@
 {% block content %}
 <div data-identifier="{{ object.identifier }}" id="{{ object.id }}">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-white">Organization: {{ object.name }}</h1>
+        <h1 class="text-3xl font-bold text-white">{{ object.name }}</h1>
         {% if object.nuon_install_state %}
             {% if cluster_count == 0 %}
                 <a href="{% url 'create-ch-cluster' object.slug %}" class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
@@ -49,19 +49,19 @@
     <div id="install-stats" class="bg-gray-900 mb-6">
         <div class="grid grid-cols-1 gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4 rounded-lg overflow-hidden">
             <div class="bg-gray-900 px-4 py-6 sm:px-6 lg:px-8">
-                <p class="text-sm font-medium text-gray-400">Name</p>
+                <p class="text-sm font-medium text-gray-400">ID</p>
                 <p class="mt-2 flex items-baseline gap-x-2">
-                    <span class="text-sm font-mono font-semibold tracking-tight text-gray-500">{{ object.name }}</span>
+                    <span class="text-sm font-mono font-semibold tracking-tight text-gray-500">{{ object.id }}</span>
                 </p>
             </div>
             <div class="bg-gray-900 px-4 py-6 sm:px-6 lg:px-8">
-                <p class="text-sm font-medium text-gray-400">Install ID</p>
+                <p class="text-sm font-medium text-gray-400">Nuon Install ID</p>
                 <p class="mt-2 flex items-baseline gap-x-2">
                     <span class="text-sm font-mono font-semibold tracking-tight text-gray-500">{{ object.nuon_install_id | default:"pending"}}</span>
                 </p>
             </div>
             <div class="bg-gray-900 px-4 py-6 sm:px-6 lg:px-8">
-                <p class="text-sm font-medium text-gray-400">Region</p>
+                <p class="text-sm font-medium text-gray-400">AWS Region</p>
                 <p class="mt-2 flex items-baseline gap-x-2">
                     <span class="text-sm font-mono font-semibold tracking-tight text-gray-500">{{ object.get_region_display }}</span>
                 </p>
