@@ -175,6 +175,7 @@ class OrgDetailWorkflowStepsPartial(LoginRequiredMixin, DetailView):
             total_steps = 0
             steps_needing_approval = []
             all_steps_completed = False
+            has_failed_steps = False
             if steps:
                 total_steps = len(steps)
                 all_steps_completed = True
@@ -185,6 +186,10 @@ class OrgDetailWorkflowStepsPartial(LoginRequiredMixin, DetailView):
                         completed_steps += 1
                     else:
                         all_steps_completed = False
+
+                    # Check for failed steps
+                    if status in ["failed", "error", "cancelled"]:
+                        has_failed_steps = True
 
                     # Filter steps that need approval
                     approval = step.get("approval")
@@ -201,11 +206,13 @@ class OrgDetailWorkflowStepsPartial(LoginRequiredMixin, DetailView):
             context["workflow_total_steps"] = total_steps
             context["has_pending_approvals"] = len(steps_needing_approval) > 0
             context["all_steps_completed"] = all_steps_completed
+            context["has_failed_steps"] = has_failed_steps
         else:
             context["workflow_steps"] = None
             context["workflow"] = None
             context["has_pending_approvals"] = False
             context["all_steps_completed"] = False
+            context["has_failed_steps"] = False
 
         # Add approve URLs for the template
         from django.urls import reverse
