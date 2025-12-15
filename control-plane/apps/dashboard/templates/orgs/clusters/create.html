@@ -179,7 +179,9 @@
           <div class="mt-2 grid grid-cols-1">
             <select id="{{ form.ingress_type.id_for_label }}" name="{{ form.ingress_type.name }}" class="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/5 py-1.5 pl-3 pr-8 text-base text-white outline-1 -outline-offset-1 outline-white/10 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6 [&_*]:text-black" onchange="updateIngressHelperText(this.value)">
               {% for value, label in form.ingress_type.field.choices %}
-              <option value="{{ value }}" {% if form.ingress_type.value == value %}selected{% endif %} {% if value == 'tailnet_ingress' and not organization.deploy_tailscale %}disabled{% endif %}>{{ label }}{% if value == 'tailnet_ingress' and not organization.deploy_tailscale %} (Requires Tailscale){% endif %}</option>
+              {% if value != 'tailnet' or organization.deploy_tailscale %}
+              <option value="{{ value }}" {% if form.ingress_type.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endif %}
               {% endfor %}
             </select>
             <svg class="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-400 sm:size-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -242,7 +244,7 @@
               <div class="flex-1">
                 <p class="text-xs text-red-300 font-medium">Security Warning</p>
                 <p class="text-xs text-gray-300 mt-1">
-                  Public ingress exposes your cluster to the internet. Keep your credentials safe and ensure you have proper authentication and authorization configured. Consider using IP allowlisting or other security measures.
+                  Public ingress exposes your cluster to the internet. Keep your credentials safe and ensure you have proper authentication and authorization configured.
                 </p>
               </div>
             </div>
@@ -266,11 +268,11 @@ function updateIngressHelperText(ingressType) {
   document.getElementById('ingress-helper-public').classList.add('hidden');
 
   // Show the relevant helper text based on the selected ingress type
-  if (ingressType === 'no_ingress') {
+  if (ingressType === 'none') {
     document.getElementById('ingress-helper-no-ingress').classList.remove('hidden');
-  } else if (ingressType === 'tailnet_ingress') {
+  } else if (ingressType === 'tailnet') {
     document.getElementById('ingress-helper-tailnet').classList.remove('hidden');
-  } else if (ingressType === 'public_ingress') {
+  } else if (ingressType === 'public') {
     document.getElementById('ingress-helper-public').classList.remove('hidden');
   }
 }
